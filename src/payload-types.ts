@@ -69,6 +69,13 @@ export interface Config {
   collections: {
     users: User;
     media: Media;
+    especialistas: Especialista;
+    servicios: Servicio;
+    testimonios: Testimonio;
+    faqs: Faq;
+    colegios: Colegio;
+    promociones: Promocione;
+    referidos: Referido;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -78,17 +85,30 @@ export interface Config {
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    especialistas: EspecialistasSelect<false> | EspecialistasSelect<true>;
+    servicios: ServiciosSelect<false> | ServiciosSelect<true>;
+    testimonios: TestimoniosSelect<false> | TestimoniosSelect<true>;
+    faqs: FaqsSelect<false> | FaqsSelect<true>;
+    colegios: ColegiosSelect<false> | ColegiosSelect<true>;
+    promociones: PromocionesSelect<false> | PromocionesSelect<true>;
+    referidos: ReferidosSelect<false> | ReferidosSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
-    defaultIDType: string;
+    defaultIDType: number;
   };
   fallbackLocale: null;
-  globals: {};
-  globalsSelect: {};
+  globals: {
+    configuracion: Configuracion;
+    home: Home;
+  };
+  globalsSelect: {
+    configuracion: ConfiguracionSelect<false> | ConfiguracionSelect<true>;
+    home: HomeSelect<false> | HomeSelect<true>;
+  };
   locale: null;
   widgets: {
     collections: CollectionsWidget;
@@ -122,7 +142,7 @@ export interface UserAuthOperations {
  * via the `definition` "users".
  */
 export interface User {
-  id: string;
+  id: number;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -130,6 +150,7 @@ export interface User {
   resetPasswordExpiration?: string | null;
   salt?: string | null;
   hash?: string | null;
+  resetPasswordRequestedAt?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
   sessions?:
@@ -147,8 +168,10 @@ export interface User {
  * via the `definition` "media".
  */
 export interface Media {
-  id: string;
+  id: number;
   alt: string;
+  prefix?: string | null;
+  _objectKey?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -163,10 +186,155 @@ export interface Media {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "especialistas".
+ */
+export interface Especialista {
+  id: number;
+  nombre: string;
+  slug: string;
+  profesion: string;
+  colegiatura?: string | null;
+  foto: number | Media;
+  frase?: string | null;
+  bio?: string | null;
+  especialidades?:
+    | {
+        texto: string;
+        id?: string | null;
+      }[]
+    | null;
+  anos_experiencia?: number | null;
+  servicios?: (number | Servicio)[] | null;
+  whatsapp?: string | null;
+  correo?: string | null;
+  instagram?: string | null;
+  atiende_online?: boolean | null;
+  nfc_id?: string | null;
+  orden?: number | null;
+  activo?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "servicios".
+ */
+export interface Servicio {
+  id: number;
+  nombre: string;
+  slug: string;
+  descripcion_corta: string;
+  descripcion_larga?: string | null;
+  imagen?: (number | null) | Media;
+  icono?: (number | null) | Media;
+  edades?: string | null;
+  motivos_consulta?:
+    | {
+        texto: string;
+        id?: string | null;
+      }[]
+    | null;
+  duracion_sesion?: string | null;
+  frecuencia?: string | null;
+  anos_experiencia?: string | null;
+  especialistas?: (number | Especialista)[] | null;
+  mostrar_precio?: boolean | null;
+  precio?: string | null;
+  orden?: number | null;
+  activo?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "testimonios".
+ */
+export interface Testimonio {
+  id: number;
+  nombre: string;
+  texto: string;
+  calificacion?: number | null;
+  especialista?: (number | null) | Especialista;
+  servicio?: (number | null) | Servicio;
+  fecha?: string | null;
+  publicado?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "faqs".
+ */
+export interface Faq {
+  id: number;
+  pregunta: string;
+  respuesta: string;
+  categoria: 'general' | 'servicios' | 'pagos' | 'promociones';
+  servicio?: (number | null) | Servicio;
+  orden?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "colegios".
+ */
+export interface Colegio {
+  id: number;
+  nombre: string;
+  contacto?: string | null;
+  telefono?: string | null;
+  correo?: string | null;
+  direccion?: string | null;
+  codigo_referido: string;
+  activo?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "promociones".
+ */
+export interface Promocione {
+  id: number;
+  titulo: string;
+  slug: string;
+  descripcion: string;
+  imagen?: (number | null) | Media;
+  fecha_inicio: string;
+  fecha_fin: string;
+  descuento?: string | null;
+  codigo?: string | null;
+  colegio?: (number | null) | Colegio;
+  reglas?: string | null;
+  activo?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "referidos".
+ */
+export interface Referido {
+  id: number;
+  paciente_nombre: string;
+  paciente_contacto: string;
+  codigo: string;
+  colegio?: (number | null) | Colegio;
+  especialista?: (number | null) | Especialista;
+  servicio?: (number | null) | Servicio;
+  fecha: string;
+  estado: 'pendiente' | 'aplicado' | 'vencido';
+  notas?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
-  id: string;
+  id: number;
   key: string;
   data:
     | {
@@ -183,20 +351,48 @@ export interface PayloadKv {
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: string;
+  id: number;
   document?:
     | ({
         relationTo: 'users';
-        value: string | User;
+        value: number | User;
       } | null)
     | ({
         relationTo: 'media';
-        value: string | Media;
+        value: number | Media;
+      } | null)
+    | ({
+        relationTo: 'especialistas';
+        value: number | Especialista;
+      } | null)
+    | ({
+        relationTo: 'servicios';
+        value: number | Servicio;
+      } | null)
+    | ({
+        relationTo: 'testimonios';
+        value: number | Testimonio;
+      } | null)
+    | ({
+        relationTo: 'faqs';
+        value: number | Faq;
+      } | null)
+    | ({
+        relationTo: 'colegios';
+        value: number | Colegio;
+      } | null)
+    | ({
+        relationTo: 'promociones';
+        value: number | Promocione;
+      } | null)
+    | ({
+        relationTo: 'referidos';
+        value: number | Referido;
       } | null);
   globalSlug?: string | null;
   user: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   };
   updatedAt: string;
   createdAt: string;
@@ -206,10 +402,10 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: string;
+  id: number;
   user: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   };
   key?: string | null;
   value?:
@@ -229,7 +425,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: string;
+  id: number;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
@@ -247,6 +443,7 @@ export interface UsersSelect<T extends boolean = true> {
   resetPasswordExpiration?: T;
   salt?: T;
   hash?: T;
+  resetPasswordRequestedAt?: T;
   loginAttempts?: T;
   lockUntil?: T;
   sessions?:
@@ -263,6 +460,8 @@ export interface UsersSelect<T extends boolean = true> {
  */
 export interface MediaSelect<T extends boolean = true> {
   alt?: T;
+  prefix?: T;
+  _objectKey?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -274,6 +473,144 @@ export interface MediaSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "especialistas_select".
+ */
+export interface EspecialistasSelect<T extends boolean = true> {
+  nombre?: T;
+  slug?: T;
+  profesion?: T;
+  colegiatura?: T;
+  foto?: T;
+  frase?: T;
+  bio?: T;
+  especialidades?:
+    | T
+    | {
+        texto?: T;
+        id?: T;
+      };
+  anos_experiencia?: T;
+  servicios?: T;
+  whatsapp?: T;
+  correo?: T;
+  instagram?: T;
+  atiende_online?: T;
+  nfc_id?: T;
+  orden?: T;
+  activo?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "servicios_select".
+ */
+export interface ServiciosSelect<T extends boolean = true> {
+  nombre?: T;
+  slug?: T;
+  descripcion_corta?: T;
+  descripcion_larga?: T;
+  imagen?: T;
+  icono?: T;
+  edades?: T;
+  motivos_consulta?:
+    | T
+    | {
+        texto?: T;
+        id?: T;
+      };
+  duracion_sesion?: T;
+  frecuencia?: T;
+  anos_experiencia?: T;
+  especialistas?: T;
+  mostrar_precio?: T;
+  precio?: T;
+  orden?: T;
+  activo?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "testimonios_select".
+ */
+export interface TestimoniosSelect<T extends boolean = true> {
+  nombre?: T;
+  texto?: T;
+  calificacion?: T;
+  especialista?: T;
+  servicio?: T;
+  fecha?: T;
+  publicado?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "faqs_select".
+ */
+export interface FaqsSelect<T extends boolean = true> {
+  pregunta?: T;
+  respuesta?: T;
+  categoria?: T;
+  servicio?: T;
+  orden?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "colegios_select".
+ */
+export interface ColegiosSelect<T extends boolean = true> {
+  nombre?: T;
+  contacto?: T;
+  telefono?: T;
+  correo?: T;
+  direccion?: T;
+  codigo_referido?: T;
+  activo?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "promociones_select".
+ */
+export interface PromocionesSelect<T extends boolean = true> {
+  titulo?: T;
+  slug?: T;
+  descripcion?: T;
+  imagen?: T;
+  fecha_inicio?: T;
+  fecha_fin?: T;
+  descuento?: T;
+  codigo?: T;
+  colegio?: T;
+  reglas?: T;
+  activo?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "referidos_select".
+ */
+export interface ReferidosSelect<T extends boolean = true> {
+  paciente_nombre?: T;
+  paciente_contacto?: T;
+  codigo?: T;
+  colegio?: T;
+  especialista?: T;
+  servicio?: T;
+  fecha?: T;
+  estado?: T;
+  notas?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -314,6 +651,104 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "configuracion".
+ */
+export interface Configuracion {
+  id: number;
+  nombre_consultorio?: string | null;
+  eslogan?: string | null;
+  logo?: (number | null) | Media;
+  historia?: string | null;
+  mision?: string | null;
+  vision?: string | null;
+  direccion?: string | null;
+  punto_referencia?: string | null;
+  telefono?: string | null;
+  whatsapp?: string | null;
+  correo?: string | null;
+  instagram?: string | null;
+  horarios?: string | null;
+  google_maps_embed?: string | null;
+  google_maps_url?: string | null;
+  google_review_url?: string | null;
+  seo_titulo?: string | null;
+  seo_descripcion?: string | null;
+  seo_imagen?: (number | null) | Media;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "home".
+ */
+export interface Home {
+  id: number;
+  hero_titulo?: string | null;
+  hero_subtitulo?: string | null;
+  hero_imagen?: (number | null) | Media;
+  hero_cta_texto?: string | null;
+  hero_cta_url?: string | null;
+  anos_experiencia?: string | null;
+  familias_atendidas?: string | null;
+  calificacion_promedio?: string | null;
+  mostrar_bloque_colegios?: boolean | null;
+  colegios_titulo?: string | null;
+  colegios_texto?: string | null;
+  colegios_imagen?: (number | null) | Media;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "configuracion_select".
+ */
+export interface ConfiguracionSelect<T extends boolean = true> {
+  nombre_consultorio?: T;
+  eslogan?: T;
+  logo?: T;
+  historia?: T;
+  mision?: T;
+  vision?: T;
+  direccion?: T;
+  punto_referencia?: T;
+  telefono?: T;
+  whatsapp?: T;
+  correo?: T;
+  instagram?: T;
+  horarios?: T;
+  google_maps_embed?: T;
+  google_maps_url?: T;
+  google_review_url?: T;
+  seo_titulo?: T;
+  seo_descripcion?: T;
+  seo_imagen?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "home_select".
+ */
+export interface HomeSelect<T extends boolean = true> {
+  hero_titulo?: T;
+  hero_subtitulo?: T;
+  hero_imagen?: T;
+  hero_cta_texto?: T;
+  hero_cta_url?: T;
+  anos_experiencia?: T;
+  familias_atendidas?: T;
+  calificacion_promedio?: T;
+  mostrar_bloque_colegios?: T;
+  colegios_titulo?: T;
+  colegios_texto?: T;
+  colegios_imagen?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
