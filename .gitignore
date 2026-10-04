@@ -51,3 +51,7 @@ node_modules/
 
 # Archivos de diseno
 *.ai
+
+# Archivos de backup temporales
+*.backup.tsx
+*.backup.ts

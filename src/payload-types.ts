@@ -185,32 +185,86 @@ export interface Media {
   focalY?: number | null;
 }
 /**
+ * ¡Hola! Aquí puedes agregar, editar o eliminar a los especialistas. Llena las pestañas de arriba a abajo y presiona Guardar (arriba a la derecha) cuando termines.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "especialistas".
  */
 export interface Especialista {
   id: number;
+  /**
+   * Nombre y apellido como quieres que aparezca en la web.
+   */
   nombre: string;
-  slug: string;
+  /**
+   * La profesión principal.
+   */
   profesion: string;
+  /**
+   * Opcional. Número que acredita profesionalmente.
+   */
   colegiatura?: string | null;
+  /**
+   * Opcional. Se muestra como "Más de X años".
+   */
+  anos_experiencia?: number | null;
+  /**
+   * Foto grande y de buena calidad (vertical o cuadrada). Se usa en el panel morado principal.
+   */
   foto: number | Media;
+  /**
+   * FOTO QUE SE VE EN EL CARRUSEL de la página de inicio. Debe ser circular o cuadrada, con la cara centrada.
+   */
+  foto_circular?: (number | null) | Media;
+  /**
+   * Frase corta que aparece grande sobre el recuadro morado.
+   */
   frase?: string | null;
+  /**
+   * Un párrafo de 3 a 5 líneas. Aparece debajo de la frase.
+   */
   bio?: string | null;
+  /**
+   * Hasta 3 especialidades. Cada una lleva un texto Y un icono. El icono se muestra arriba del texto en el recuadro morado.
+   */
   especialidades?:
     | {
         texto: string;
+        /**
+         * Elige el icono que acompaña este texto.
+         */
+        icono?:
+          | (
+              | 'nino'
+              | 'cerebro'
+              | 'calendario'
+              | 'corazon'
+              | 'libro'
+              | 'lapiz'
+              | 'burbuja'
+              | 'mano'
+              | 'video'
+              | 'estrella'
+            )
+          | null;
         id?: string | null;
       }[]
     | null;
-  anos_experiencia?: number | null;
-  servicios?: (number | Servicio)[] | null;
-  whatsapp?: string | null;
-  correo?: string | null;
-  instagram?: string | null;
-  atiende_online?: boolean | null;
+  /**
+   * Opcional. Se usa para identificar la tarjeta física NFC.
+   */
   nfc_id?: string | null;
+  /**
+   * Se genera automáticamente a partir del nombre.
+   */
+  slug: string;
+  /**
+   * Número menor = aparece primero en el carrusel.
+   */
   orden?: number | null;
+  /**
+   * Si lo desmarcas, no aparece en la web pública.
+   */
   activo?: boolean | null;
   updatedAt: string;
   createdAt: string;
@@ -480,25 +534,22 @@ export interface MediaSelect<T extends boolean = true> {
  */
 export interface EspecialistasSelect<T extends boolean = true> {
   nombre?: T;
-  slug?: T;
   profesion?: T;
   colegiatura?: T;
+  anos_experiencia?: T;
   foto?: T;
+  foto_circular?: T;
   frase?: T;
   bio?: T;
   especialidades?:
     | T
     | {
         texto?: T;
+        icono?: T;
         id?: T;
       };
-  anos_experiencia?: T;
-  servicios?: T;
-  whatsapp?: T;
-  correo?: T;
-  instagram?: T;
-  atiende_online?: T;
   nfc_id?: T;
+  slug?: T;
   orden?: T;
   activo?: T;
   updatedAt?: T;
