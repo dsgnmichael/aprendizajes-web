@@ -1,6 +1,6 @@
-# Aprendizajes · Plataforma de perfiles profesionales
+# Aprendizajess · Plataforma de perfiles profesionales
 
-Sitio de **Aprendizajes** con tres piezas, todas administradas desde un **backoffice** independiente (page builder, borradores, vista previa y publicación):
+Sitio de **Aprendizajess** con tres piezas, todas administradas desde un **backoffice** independiente (page builder, borradores, vista previa y publicación):
 
 1. **Landing de venta** en `/`: la presentación comercial del consultorio (hero con el equipo, cifras verificables, servicios, proceso, equipo, testimonios, compromiso ético, planes, preguntas frecuentes, CTA y contacto). Se edita en *Backoffice → Página de inicio*.
 2. **Sección Equipo** en `/equipo`: todos los profesionales publicados.
@@ -70,7 +70,7 @@ pnpm dev                       # web :3000 + admin :3001
 | `pnpm build` | Build de producción de ambas apps (Turborepo) |
 | `pnpm lint` · `pnpm typecheck` | ESLint · TypeScript (paquetes, apps, scripts y e2e) |
 | `pnpm test` | Vitest: dominio, integraciones (Google con mocks), repositorios contra MongoDB en memoria, auth, web, admin |
-| `pnpm test:e2e` | Playwright: levanta ambas apps (3100/3101) contra la base aislada `aprendizajes_e2e` (requiere `pnpm build` y MongoDB en `MONGODB_URI`) |
+| `pnpm test:e2e` | Playwright: levanta ambas apps (3100/3101) contra la base aislada `aprendizajess_e2e` (requiere `pnpm build` y MongoDB en `MONGODB_URI`) |
 | `pnpm db:seed` / `pnpm db:seed --reset` | Datos demo idempotentes (incluye la landing de ejemplo y migra instalaciones existentes a raíz = landing) / elimina lo marcado como demo y re-crea |
 | `pnpm db:indexes` | Crea/asegura índices |
 | `pnpm db:local` | MongoDB local persistente en `mongodb://127.0.0.1:27017` |
@@ -97,7 +97,7 @@ Todas documentadas en [`.env.example`](.env.example). Un único `.env` en la ra�
 ## MongoDB Atlas
 
 1. Crear cluster → *Database Access*: usuario con rol `readWrite` sobre la base → *Network Access*: IPs de tu hosting.
-2. `MONGODB_URI=mongodb+srv://usuario:clave@cluster.xxxxx.mongodb.net/?retryWrites=true&w=majority` y `MONGODB_DB_NAME=aprendizajes`.
+2. `MONGODB_URI=mongodb+srv://usuario:clave@cluster.xxxxx.mongodb.net/?retryWrites=true&w=majority` y `MONGODB_DB_NAME=aprendizajess`.
 3. `pnpm db:indexes` y, opcionalmente, `pnpm db:seed`.
 
 ## Cómo funciona

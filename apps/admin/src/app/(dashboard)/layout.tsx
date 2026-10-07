@@ -30,7 +30,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
             A
           </span>
           <div className="leading-tight">
-            <p className="text-sm font-semibold">Aprendizajes</p>
+            <p className="text-sm font-semibold">Aprendizajess</p>
             <p className="text-muted-foreground text-xs">Backoffice</p>
           </div>
         </div>
@@ -40,7 +40,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
       <div className="min-w-0">
         <div className="bg-background/90 sticky top-0 z-30 flex h-14 items-center gap-2 border-b px-3 backdrop-blur lg:hidden">
           <MobileNav items={items} badges={badges} />
-          <span className="text-sm font-semibold">Aprendizajes</span>
+          <span className="text-sm font-semibold">Aprendizajess</span>
           <div className="ml-auto w-44">{userMenu}</div>
         </div>
         <main id="main" className="mx-auto w-full max-w-[1400px] px-4 py-6 sm:px-6 lg:px-8 lg:py-8">

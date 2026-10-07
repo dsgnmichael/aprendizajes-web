@@ -5,7 +5,7 @@ import { login, unique } from './helpers'
 test('an appointment request can be opened and its status changed', async ({ page }) => {
   const firstName = unique('Paciente')
   const client = await MongoClient.connect(process.env.MONGODB_URI ?? 'mongodb://127.0.0.1:27017')
-  const db = client.db(process.env.MONGODB_DB_NAME ?? 'aprendizajes_e2e')
+  const db = client.db(process.env.MONGODB_DB_NAME ?? 'aprendizajess_e2e')
   const professional = await db.collection('professionals').findOne({ slug: 'jessica-de-sousa' })
   const now = new Date()
   await db.collection('appointmentRequests').insertOne({

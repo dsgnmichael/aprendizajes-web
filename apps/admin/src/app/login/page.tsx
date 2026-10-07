@@ -24,7 +24,7 @@ export default async function LoginPage({ searchParams }: PageProps<'/login'>) {
               A
             </span>
             <div>
-              <p className="text-sm font-semibold">Aprendizajes</p>
+              <p className="text-sm font-semibold">Aprendizajess</p>
               <p className="text-muted-foreground text-xs">Backoffice</p>
             </div>
           </div>

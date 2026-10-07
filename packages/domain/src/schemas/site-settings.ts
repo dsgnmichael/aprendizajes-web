@@ -19,7 +19,7 @@ export const navItemSchema = z.object({
 export type NavItem = z.infer<typeof navItemSchema>
 
 export const siteSettingsSchema = z.object({
-  organizationName: text(80).min(1).default('Aprendizajes'),
+  organizationName: text(80).min(1).default('Aprendizajess'),
   tagline: optionalText(160),
   logo: mediaRefSchema.optional(),
   favicon: mediaRefSchema.optional(),
@@ -87,15 +87,15 @@ export const siteSettingsSchema = z.object({
     .default({ privacyUrl: '', termsUrl: '' }),
   seo: z
     .object({
-      defaultTitle: text(70).default('Aprendizajes'),
+      defaultTitle: text(70).default('Aprendizajess'),
       titleTemplate: text(70)
-        .default('%s · Aprendizajes')
+        .default('%s · Aprendizajess')
         .refine((v) => v.includes('%s'), 'Debe incluir %s'),
       description: optionalText(170),
       ogImage: mediaRefSchema.optional(),
       locale: text(10).default('es_CL'),
     })
-    .default({ defaultTitle: 'Aprendizajes', titleTemplate: '%s · Aprendizajes', description: '', locale: 'es_CL' }),
+    .default({ defaultTitle: 'Aprendizajess', titleTemplate: '%s · Aprendizajess', description: '', locale: 'es_CL' }),
   root: z
     .object({
       mode: z.enum(ROOT_MODES).default('LANDING'),

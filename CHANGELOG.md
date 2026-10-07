@@ -7,6 +7,26 @@ y el proyecto sigue [Versionado Semántico](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-10-07
+
+### Fixed
+
+- Nombre de la marca corregido de "Aprendizajes" a **"Aprendizajess"** en la configuración por
+  defecto del sitio (nombre de la organización, títulos SEO y plantilla de título), el seed y el
+  contenido de ejemplo de la landing, el backoffice (barra lateral, login y título) y la
+  documentación.
+- Identificadores técnicos alineados: paquete raíz `aprendizajess-platform`, `appName` de la
+  conexión a MongoDB, base por defecto `aprendizajess` y base E2E `aprendizajess_e2e`.
+- Dominios de producción: el sitio público pasa a `aprendizajess.vercel.app` y el backoffice a
+  `aprendizajess-admin.vercel.app`.
+
+### Added
+
+- Migración de datos idempotente `pnpm db:migrate:brand` (simulación por defecto, `--apply` para
+  escribir) que corrige el nombre en los datos ya guardados: configuración, landing, perfiles y
+  sus versiones publicadas, testimonios y textos alternativos de imágenes. El historial de
+  revisiones no se modifica.
+
 ## [1.0.0] - 2026-10-06
 
 Primera versión de la plataforma. Reemplaza por completo la plantilla de Payload CMS
@@ -84,5 +104,6 @@ Primera versión de la plataforma. Reemplaza por completo la plantilla de Payloa
 - CSP y cabeceras de seguridad, protección contra *open redirect*, rich text sin HTML
   arbitrario y auditoría sin datos sensibles.
 
-[Unreleased]: https://github.com/dsgnmichael/aprendizajes-web/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/dsgnmichael/aprendizajes-web/compare/v1.0.1...HEAD
+[1.0.1]: https://github.com/dsgnmichael/aprendizajes-web/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/dsgnmichael/aprendizajes-web/releases/tag/v1.0.0
