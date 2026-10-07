@@ -1,0 +1,65 @@
+import type { IconName } from '@repo/domain'
+import {
+  Activity,
+  Award,
+  Baby,
+  BookOpen,
+  Brain,
+  Calendar,
+  Clock,
+  GraduationCap,
+  HandHeart,
+  HeartHandshake,
+  House,
+  Languages,
+  type LucideIcon,
+  MapPin,
+  MessageCircle,
+  Monitor,
+  Pencil,
+  Puzzle,
+  School,
+  ShieldCheck,
+  Smile,
+  Sparkles,
+  Star,
+  Stethoscope,
+  User,
+  Users,
+  Video,
+} from 'lucide-react'
+
+/** Whitelisted CMS icon names → tree-shaken Lucide components. */
+const ICONS: Record<IconName, LucideIcon> = {
+  user: User,
+  users: Users,
+  baby: Baby,
+  'graduation-cap': GraduationCap,
+  brain: Brain,
+  puzzle: Puzzle,
+  'book-open': BookOpen,
+  'heart-handshake': HeartHandshake,
+  monitor: Monitor,
+  video: Video,
+  'map-pin': MapPin,
+  home: House,
+  calendar: Calendar,
+  clock: Clock,
+  'message-circle': MessageCircle,
+  sparkles: Sparkles,
+  school: School,
+  smile: Smile,
+  'hand-heart': HandHeart,
+  stethoscope: Stethoscope,
+  pencil: Pencil,
+  languages: Languages,
+  activity: Activity,
+  'shield-check': ShieldCheck,
+  star: Star,
+  award: Award,
+}
+
+export function Icon({ name, className, size = 20 }: { name: IconName; className?: string; size?: number }) {
+  const Component = ICONS[name] ?? Sparkles
+  return <Component aria-hidden="true" className={className} size={size} strokeWidth={1.75} />
+}

@@ -1,0 +1,52 @@
+{
+  "name": "aprendizajes-platform",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.33.0",
+  "engines": {
+    "node": ">=20.9.0"
+  },
+  "scripts": {
+    "dev": "turbo run dev --filter=@repo/web --filter=@repo/admin",
+    "dev:web": "turbo run dev --filter=@repo/web",
+    "dev:admin": "turbo run dev --filter=@repo/admin",
+    "build": "turbo run build",
+    "start": "turbo run start --filter=@repo/web --filter=@repo/admin",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck && tsc -p tsconfig.json",
+    "test": "turbo run test",
+    "test:e2e": "playwright test",
+    "format": "prettier --write .",
+    "db:seed": "tsx --env-file-if-exists=.env scripts/seed.ts",
+    "db:indexes": "tsx --env-file-if-exists=.env scripts/ensure-indexes.ts",
+    "db:local": "tsx scripts/local-mongo.ts",
+    "secrets:generate": "tsx scripts/generate-secrets.ts"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.58.2",
+    "@repo/auth": "workspace:*",
+    "@repo/config": "workspace:*",
+    "@repo/data-access": "workspace:*",
+    "@repo/database": "workspace:*",
+    "@repo/domain": "workspace:*",
+    "@repo/integrations": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "@types/node": "22.19.9",
+    "mongodb": "7.7.0",
+    "mongodb-memory-server": "11.3.0",
+    "prettier": "3.6.2",
+    "prettier-plugin-tailwindcss": "0.7.1",
+    "tsx": "4.23.15",
+    "turbo": "2.11.7",
+    "typescript": "5.9.3"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "sharp",
+      "esbuild",
+      "unrs-resolver",
+      "mongodb-memory-server"
+    ]
+  }
+}

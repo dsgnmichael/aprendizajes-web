@@ -1,0 +1,18 @@
+@import 'tailwindcss';
+@import '@repo/ui/styles.css';
+
+@source '../../../../packages/ui/src';
+
+@theme inline {
+  --font-sans: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+}
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+  }
+  :focus-visible {
+    outline-offset: 2px;
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "name": "@repo/data-access",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@repo/config": "workspace:*",
+    "@repo/database": "workspace:*",
+    "@repo/domain": "workspace:*",
+    "mongodb": "7.7.0"
+  },
+  "devDependencies": {
+    "@repo/eslint-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "@types/node": "22.19.9",
+    "eslint": "9.39.5",
+    "mongodb-memory-server": "11.3.0",
+    "typescript": "5.9.3",
+    "vitest": "4.0.18"
+  }
+}

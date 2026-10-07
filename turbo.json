@@ -1,0 +1,49 @@
+{
+  "$schema": "https://turborepo.com/schema.json",
+  "ui": "stream",
+  "globalDependencies": [".env"],
+  "globalEnv": ["NODE_ENV"],
+  "globalPassThroughEnv": [
+    "MONGODB_URI",
+    "MONGODB_DB_NAME",
+    "AUTH_SECRET",
+    "PUBLIC_BASE_URL",
+    "ADMIN_BASE_URL",
+    "REVALIDATION_SECRET",
+    "PREVIEW_SECRET",
+    "MEDIA_PROVIDER",
+    "LOCAL_MEDIA_DIR",
+    "BLOB_READ_WRITE_TOKEN",
+    "GOOGLE_MAPS_API_KEY",
+    "GOOGLE_CLIENT_ID",
+    "GOOGLE_CLIENT_SECRET",
+    "GOOGLE_REDIRECT_URI",
+    "INTEGRATION_ENCRYPTION_KEY",
+    "CRON_SECRET",
+    "NEXT_PUBLIC_GA_MEASUREMENT_ID"
+  ],
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": [".next/**", "!.next/cache/**", "dist/**"]
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "start": {
+      "cache": false,
+      "persistent": true,
+      "dependsOn": ["build"]
+    },
+    "lint": {
+      "dependsOn": ["^lint"]
+    },
+    "typecheck": {
+      "dependsOn": ["^typecheck"]
+    },
+    "test": {
+      "outputs": ["coverage/**"]
+    }
+  }
+}

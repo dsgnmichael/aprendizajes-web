@@ -1,0 +1,37 @@
+{
+  "name": "@repo/integrations",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts",
+    "./crypto": "./src/crypto.ts",
+    "./signing": "./src/signing.ts",
+    "./revalidation": "./src/revalidation.ts",
+    "./testimonials": "./src/testimonials/index.ts",
+    "./google": "./src/google/index.ts",
+    "./media": "./src/media/index.ts"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@repo/config": "workspace:*",
+    "@repo/data-access": "workspace:*",
+    "@repo/database": "workspace:*",
+    "@repo/domain": "workspace:*",
+    "@vercel/blob": "2.8.0",
+    "sharp": "0.35.5"
+  },
+  "devDependencies": {
+    "@repo/eslint-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "@types/node": "22.19.9",
+    "eslint": "9.39.5",
+    "typescript": "5.9.3",
+    "vitest": "4.0.18"
+  }
+}
