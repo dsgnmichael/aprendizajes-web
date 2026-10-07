@@ -68,6 +68,12 @@ Primera versión de la plataforma. Reemplaza por completo la plantilla de Payloa
   Promociones y Referidos) y la API GraphQL.
 - Hero y Header con contenido fijo en el código, y el botón **Login** del sitio público.
 - `package-lock.json`, `.yarnrc`, Dockerfile y docker-compose de la plantilla.
+- Cambios posteriores sobre la app antigua que `master` recibió en paralelo (`29b634e`,
+  `3c077b8`): carrusel de testimonios con auto-rotación, campos extra de Especialistas,
+  `scripts/import-reviews.ts` y el ajuste de render dinámico para Postgres. La v1.0.0 los
+  reemplaza: ya trae su propio carrusel de testimonios, y las reseñas de Google se
+  incorporan mediante la integración oficial (Places API / Business Profile). Copiar
+  reseñas de Maps a la base de datos no está permitido por las políticas de Google.
 
 ### Security
 
