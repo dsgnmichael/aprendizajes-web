@@ -34,3 +34,7 @@ playwright/.cache/
 npm-debug.log*
 .vercel
 *.ai
+
+# Archivos de backup temporales
+*.backup.tsx
+*.backup.ts
