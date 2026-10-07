@@ -1,7 +1,7 @@
 import { defineConfig, devices } from '@playwright/test'
 
 /**
- * E2E runs both apps against an isolated database (`aprendizajes_e2e`) that
+ * E2E runs both apps against an isolated database (`aprendizajess_e2e`) that
  * is reset + seeded in global setup. Ports differ from dev (3000/3001) so a
  * running dev session is never touched.
  *
@@ -14,7 +14,7 @@ const MONGODB_URI = process.env.MONGODB_URI ?? 'mongodb://127.0.0.1:27017'
 
 export const e2eEnv = {
   MONGODB_URI,
-  MONGODB_DB_NAME: 'aprendizajes_e2e',
+  MONGODB_DB_NAME: 'aprendizajess_e2e',
   PUBLIC_BASE_URL: `http://localhost:${WEB_PORT}`,
   ADMIN_BASE_URL: `http://localhost:${ADMIN_PORT}`,
   AUTH_SECRET: 'e2e-auth-secret-0123456789abcdefghijklmnop',

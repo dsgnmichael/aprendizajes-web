@@ -19,7 +19,7 @@ export async function getMongoClient(): Promise<MongoClient> {
   if (!cache.promise) {
     const uri = requireEnv('MONGODB_URI', 'the database connection')
     const client = new MongoClient(uri, {
-      appName: 'aprendizajes-platform',
+      appName: 'aprendizajess-platform',
       maxPoolSize: 10,
       serverSelectionTimeoutMS: 8000,
     })

@@ -23,7 +23,7 @@ export function MobileNav({
         </Button>
       </SheetTrigger>
       <SheetContent side="left" className="bg-sidebar p-4">
-        <SheetTitle className="mb-2 px-2 text-sm">Aprendizajes · Backoffice</SheetTitle>
+        <SheetTitle className="mb-2 px-2 text-sm">Aprendizajess · Backoffice</SheetTitle>
         <NavLinks items={items} badges={badges} onNavigate={() => setOpen(false)} />
       </SheetContent>
     </Sheet>

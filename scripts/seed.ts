@@ -139,7 +139,7 @@ const demos: DemoSeed[] = [
             items: [
               { id: 'e1', period: '2010', title: 'Inicio de la práctica clínica (DEMO)', description: '' },
               { id: 'e2', period: '2016', title: 'Especialización en funciones ejecutivas (DEMO)', description: '' },
-              { id: 'e3', period: 'Hoy', title: 'Consulta integral Aprendizajes', description: '' },
+              { id: 'e3', period: 'Hoy', title: 'Consulta integral Aprendizajess', description: '' },
             ],
           },
         },
@@ -282,10 +282,10 @@ const demos: DemoSeed[] = [
 function siteSettings(): SiteSettings {
   return {
     ...defaultSiteSettings,
-    organizationName: 'Aprendizajes',
+    organizationName: 'Aprendizajess',
     tagline: 'Consultorio integral de aprendizaje',
-    logo: img('/brand/logo.png', 761, 436, 'Aprendizajes'),
-    favicon: img('/brand/logo.png', 761, 436, 'Aprendizajes'),
+    logo: img('/brand/logo.png', 761, 436, 'Aprendizajess'),
+    favicon: img('/brand/logo.png', 761, 436, 'Aprendizajess'),
     navigation: {
       enabled: true,
       items: [
@@ -299,7 +299,7 @@ function siteSettings(): SiteSettings {
     social: { ...defaultSiteSettings.social, instagram: 'https://www.instagram.com/aprendizajess' },
     seo: {
       ...defaultSiteSettings.seo,
-      defaultTitle: 'Aprendizajes · Consultorio integral',
+      defaultTitle: 'Aprendizajess · Consultorio integral',
       description: 'Profesionales en psicopedagogía, psicología, lenguaje y terapia ocupacional.',
     },
     copy: { ...defaultSiteSettings.copy, directoryIntro: 'Un equipo que acompaña el aprendizaje con cercanía, juego y método.' },
@@ -388,7 +388,7 @@ async function main() {
         hero: img(heroUrl, w, h, `${demo.input.name}, ${demo.input.professionalTitle}`),
         avatar: img(`/demo/avatars/${demo.input.slug}.png`, 258, 258, demo.input.name),
       },
-      location: { label: 'Consulta Aprendizajes', address: '', city: 'Santiago', region: 'RM', country: 'CL', mapsUrl: '' },
+      location: { label: 'Consulta Aprendizajess', address: '', city: 'Santiago', region: 'RM', country: 'CL', mapsUrl: '' },
       testimonials: { source: 'MANUAL', addReviewUrl: 'https://maps.app.goo.gl/U6Jj8aPCMypiP9TLA' },
     })
     const created = await createProfessional(input, SYSTEM_ACTOR)
@@ -421,7 +421,7 @@ async function main() {
     await createTestimonial(
       {
         professionalId: null,
-        authorName: 'Comunidad Aprendizajes (demo)',
+        authorName: 'Comunidad Aprendizajess (demo)',
         authorDetail: 'Testimonio general',
         content: 'Un equipo que trabaja coordinado: psicopedagogía, lenguaje y psicología conversando entre sí por el bienestar de cada niño.',
         rating: 5,

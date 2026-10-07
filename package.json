@@ -1,6 +1,6 @@
 {
-  "name": "aprendizajes-platform",
-  "version": "1.0.0",
+  "name": "aprendizajess-platform",
+  "version": "1.0.1",
   "private": true,
   "type": "module",
   "packageManager": "pnpm@10.33.0",
@@ -21,7 +21,8 @@
     "db:seed": "tsx --env-file-if-exists=.env scripts/seed.ts",
     "db:indexes": "tsx --env-file-if-exists=.env scripts/ensure-indexes.ts",
     "db:local": "tsx scripts/local-mongo.ts",
-    "secrets:generate": "tsx scripts/generate-secrets.ts"
+    "secrets:generate": "tsx scripts/generate-secrets.ts",
+    "db:migrate:brand": "tsx --env-file-if-exists=.env scripts/migrations/2026-10-07-brand-aprendizajess.ts"
   },
   "devDependencies": {
     "@playwright/test": "1.58.2",

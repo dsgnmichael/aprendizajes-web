@@ -30,7 +30,7 @@ const url = (fallback: string) =>
 const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   MONGODB_URI: optional,
-  MONGODB_DB_NAME: z.string().trim().default('aprendizajes'),
+  MONGODB_DB_NAME: z.string().trim().default('aprendizajess'),
   AUTH_SECRET: secret(32),
   PUBLIC_BASE_URL: url('http://localhost:3000'),
   ADMIN_BASE_URL: url('http://localhost:3001'),

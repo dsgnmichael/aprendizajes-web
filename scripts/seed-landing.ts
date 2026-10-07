@@ -25,7 +25,7 @@ export function exampleLanding(): HomePageInput {
   let o = 0
   return homePageInputSchema.parse({
     seo: {
-      title: 'Aprendizajes · Consultorio integral de aprendizaje',
+      title: 'Aprendizajess · Consultorio integral de aprendizaje',
       description:
         'Psicopedagogía, psicología infanto-juvenil, fonoaudiología, terapia ocupacional y tareas dirigidas. Atención presencial y online.',
     },
