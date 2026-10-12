@@ -38,3 +38,4 @@ npm-debug.log*
 # Archivos de backup temporales
 *.backup.tsx
 *.backup.ts
+.env*

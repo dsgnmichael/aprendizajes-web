@@ -1,7 +1,7 @@
 'use client'
 
 import type { AppointmentAction } from '@repo/domain'
-import { ArrowUpRight, CalendarHeart } from 'lucide-react'
+import { CalendarHeart } from 'lucide-react'
 import { Magnet } from '@/components/fx/Magnet'
 import { track } from '@/lib/analytics'
 import { cn } from '@/lib/cn'
@@ -10,7 +10,7 @@ import { useAppointment } from './AppointmentContext'
 const styles = {
   light:
     'bg-surface text-brand-deep shadow-lifted hover:bg-canvas focus-visible:outline-accent-warm',
-  brand: 'bg-brand text-on-brand shadow-glow hover:bg-brand-deep',
+  brand: 'bg-brand text-on-brand shadow-glow hover:bg-[#8777b5]',
   ghost: 'bg-transparent text-on-brand ring-1 ring-on-brand/40 hover:bg-on-brand/10',
 } as const
 
@@ -49,9 +49,6 @@ export function AppointmentButton({
     <>
       <CalendarHeart aria-hidden="true" size={size === 'lg' ? 20 : 18} strokeWidth={2} />
       <span>{label}</span>
-      {action.kind === 'link' ? (
-        <ArrowUpRight aria-hidden="true" size={18} className="transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-      ) : null}
     </>
   )
 

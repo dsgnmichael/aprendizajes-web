@@ -60,7 +60,7 @@ export function ProfessionalSwitcherClient({
       <ul
         ref={railRef}
         onScroll={measure}
-        className="no-scrollbar flex snap-x snap-mandatory gap-3 overflow-x-auto px-2 py-3 sm:gap-5 md:justify-center-safe"
+        className="no-scrollbar flex snap-x snap-mandatory gap-3 overflow-x-auto px-2 py-3 sm:gap-5 justify-center-safe"
         onKeyDown={(e) => {
           const links = Array.from(railRef.current?.querySelectorAll<HTMLAnchorElement>('a') ?? [])
           const i = links.indexOf(document.activeElement as HTMLAnchorElement)
@@ -80,28 +80,32 @@ export function ProfessionalSwitcherClient({
             <li key={card.id} className="shrink-0 snap-center">
               <a
                 href={`/${card.slug}`}
+                title={card.professionalTitle}
                 aria-current={isActive ? 'page' : undefined}
                 aria-label={`${card.name}, ${card.professionalTitle}${isActive ? ' (perfil actual)' : ''}`}
                 onClick={() => {
                   if (!isActive) track('professional_switch', { from: activeSlug, to: card.slug })
                 }}
-                className="group flex w-[76px] flex-col items-center gap-2 rounded-2xl p-1 text-center sm:w-[92px]"
+                className="group flex w-[76px] flex-col items-center gap-1 rounded-2xl p-1 text-center sm:w-[92px]"
               >
-                <span className="relative grid size-[68px] place-items-center sm:size-[80px]">
+                <span className={cn(
+                  'relative grid place-items-center transition-transform duration-500 ease-out-expo',
+                  isActive ? 'size-[80px] sm:size-[92px] motion-safe:animate-[float_4s_ease-in-out_infinite]' : 'size-[68px] sm:size-[80px]',
+                )}>
                   <span
                     aria-hidden="true"
                     className={cn(
-                      'absolute inset-0 rounded-full ring-offset-[3px] ring-offset-canvas transition-[box-shadow,transform] duration-500 ease-out-expo',
-                      isActive ? 'ring-[3px] ring-brand motion-safe:animate-[pop-ring_600ms_var(--ease-out)_both]' : 'ring-0 group-hover:ring-2 group-hover:ring-brand/40',
+                      'absolute inset-0 rounded-full transition-[box-shadow] duration-500 ease-out-expo',
+                      isActive ? 'ring-[3px] ring-[#4d2a80]' : 'ring-0',
                     )}
                   />
                   <span
                     className={cn(
-                      'relative size-full overflow-hidden rounded-full bg-brand-soft transition-[transform,filter] duration-300 ease-out-expo group-hover:scale-[1.06] group-active:scale-95',
-                      !isActive && 'grayscale-[35%] group-hover:grayscale-0',
+                      'relative size-full overflow-hidden rounded-full bg-brand-soft',
                     )}
                   >
                     {avatar ? (
+                      <>
                       <Image
                         src={avatar.url}
                         alt=""
@@ -111,13 +115,21 @@ export function ProfessionalSwitcherClient({
                         className="size-full object-cover"
                         style={{ objectPosition: focalPosition(avatar) }}
                       />
+
+                        {!isActive ? (
+                          <span
+                            aria-hidden="true"
+                            className="pointer-events-none absolute inset-0 bg-[#b7ace5] opacity-75 mix-blend-color"
+                          />
+                        ) : null}
+                        </>
                     ) : (
                       <span className="grid size-full place-items-center text-lg font-black text-brand-deep">{initials(card.name)}</span>
                     )}
                   </span>
                 </span>
                 {showNames ? (
-                  <span className={cn('line-clamp-2 text-[0.72rem] leading-tight font-bold sm:text-xs', isActive ? 'text-brand-deep' : 'text-ink-muted')}>
+                  <span className={cn('line-clamp-2 text-[0.72rem] leading-tight sm:text-xs', isActive ? 'font-black text-[#4d2a80]' : 'font-normal text-gray-500')}>
                     {card.name}
                   </span>
                 ) : null}
@@ -136,7 +148,7 @@ function ArrowButton({ side, onClick }: { side: 'start' | 'end'; onClick: () => 
     <div
       className={cn(
         'pointer-events-none absolute inset-y-0 z-10 flex items-center',
-        side === 'start' ? 'left-0 bg-gradient-to-r from-canvas via-canvas/80 pr-6' : 'right-0 bg-gradient-to-l from-canvas via-canvas/80 pl-6',
+        side === 'start' ? 'left-0 bg-gradient-to-r from-[#b7ace5] via-[#b7ace5]/80 pr-6' : 'right-0 bg-gradient-to-l from-[#b7ace5] via-[#b7ace5]/80 pl-6',
       )}
     >
       <button

@@ -50,6 +50,7 @@ export function TestimonialCarousel({
   const [index, setIndex] = useState(0)
   const [direction, setDirection] = useState(1)
   const [expanded, setExpanded] = useState(false)
+  const [paused, setPaused] = useState(false)
   const rootRef = useRef<HTMLDivElement>(null)
   const reduce = useReducedMotion()
   const regionId = useId()
@@ -92,6 +93,13 @@ export function TestimonialCarousel({
     [count],
   )
 
+  // Auto-rotacion cada 4 segundos (pausa al pasar el mouse)
+  useEffect(() => {
+    if (count < 2 || paused) return
+    const interval = setInterval(() => go(1), 4000)
+    return () => clearInterval(interval)
+  }, [count, paused, go])
+
   if (count === 0) return null
   const current = items[Math.min(index, count - 1)]!
   const long = current.content.length > CLAMP_CHARS
@@ -106,6 +114,8 @@ export function TestimonialCarousel({
         aria-roledescription="carrusel"
         aria-label={title}
         className="relative"
+        onMouseEnter={() => setPaused(true)}
+        onMouseLeave={() => setPaused(false)}
         onKeyDown={(e) => {
           if (e.key === 'ArrowRight') go(1)
           if (e.key === 'ArrowLeft') go(-1)
@@ -258,8 +268,14 @@ export function TestimonialCarousel({
             <span />
           )}
           {addReview ? (
-            <a href={addReview.href} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center gap-1 font-bold tracking-wide text-brand uppercase hover:underline">
-              + {addReview.label}
+            <a
+              href={addReview.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex min-h-12 items-center gap-2 rounded-full bg-brand px-6 py-3 font-black tracking-wide text-on-brand uppercase shadow-glow transition-transform duration-300 ease-out-expo hover:scale-105 hover:bg-[#8777b5] motion-safe:animate-[float_4s_ease-in-out_infinite]"
+            >
+              <Star size={16} aria-hidden="true" className="fill-accent-warm text-accent-warm" />
+              {addReview.label}
             </a>
           ) : null}
         </div>
@@ -275,7 +291,7 @@ function NavButton({ label, onClick, controls, children }: { label: string; onCl
       aria-label={label}
       aria-controls={controls}
       onClick={onClick}
-      className="grid size-12 place-items-center rounded-full bg-brand text-on-brand shadow-soft transition-[transform,background-color] duration-200 hover:bg-brand-deep active:scale-90"
+      className="grid size-12 place-items-center rounded-full bg-[#c9bfd3] text-[#4d2a80] shadow-soft transition-[transform,background-color] duration-200 hover:bg-[#b7ace5] active:scale-90"
     >
       {children}
     </button>

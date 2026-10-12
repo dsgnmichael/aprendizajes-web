@@ -22,9 +22,19 @@ export function About({ section, ctx }: SectionProps<'about'>) {
   const portrait = profile.images.profile ?? profile.images.avatar
   return (
     <SectionShell section={section} labelledBy={id}>
-      <div className={cn(container, section.variant === 'split' ? 'grid gap-12 md:grid-cols-[0.8fr_1.2fr] md:items-start' : 'max-w-prose text-center')}>
+      <div className={cn(container, section.variant === 'split' ? 'grid gap-12 md:grid-cols-[0.8fr_1.2fr] md:items-start' : 'max-w-prose')}>
         <div className="reveal">
-          <SectionHeading id={id} kicker={profile.scriptTitle || undefined} title={section.content.title || site.copy.aboutTitle} align={section.variant === 'centered' ? 'center' : 'start'} />
+          <header className="mb-0">
+            <h2 id={id} className="text-sm font-black tracking-[0.22em] text-[#3c3c3b] uppercase">
+              {section.content.title || site.copy.aboutTitle}
+            </h2>
+            <p className="mt-4 text-[clamp(1.4rem,4vw,2.4rem)] leading-[1.05] font-black tracking-[-0.02em] break-words text-black uppercase">
+              {profile.name}
+            </p>
+            <p className="script mt-1 origin-left pb-0 text-[clamp(1.4rem,4.2vw,2.4rem)] leading-[1.2] text-[#4d2a80]">
+              {profile.scriptTitle || profile.professionalTitle}
+            </p>
+          </header>
           {portrait && section.variant === 'split' ? (
             <div className="relative hidden aspect-square w-48 overflow-hidden rounded-full border-4 border-surface shadow-lifted md:block">
               <Image src={portrait.url} alt={portrait.alt || profile.name} fill sizes="192px" className="object-cover" style={{ objectPosition: focalPosition(portrait) }} />
@@ -36,7 +46,7 @@ export function About({ section, ctx }: SectionProps<'about'>) {
           {profile.credentials.length > 0 ? (
             <ul className={cn('mt-8 flex flex-wrap gap-2', section.variant === 'centered' && 'justify-center')} aria-label="Formación y credenciales">
               {profile.credentials.map((credential) => (
-                <li key={credential} className="rounded-full border border-line bg-surface px-4 py-2 text-sm font-bold text-ink">
+                <li key={credential} className="rounded-full bg-[#ece7f3] px-4 py-2 text-sm font-bold text-[#3c3c3b]">
                   {credential}
                 </li>
               ))}
@@ -142,7 +152,7 @@ export function Services({ section, ctx }: SectionProps<'services'>) {
           ))}
         </ul>
         {appointment.action.kind !== 'disabled' ? (
-          <div className="mt-10 flex justify-center">
+          <div className="mt-10 flex justify-center motion-safe:animate-[float_4s_ease-in-out_infinite]">
             <AppointmentButton action={appointment.action} label={appointment.label} slug={profile.slug} placement="services" />
           </div>
         ) : null}

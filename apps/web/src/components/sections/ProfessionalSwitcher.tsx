@@ -16,9 +16,9 @@ export function ProfessionalSwitcher({ section, ctx }: SectionProps<'professiona
   const title = section.content.title || site.copy.switcherTitle
   const id = `h-${section.id}`
   return (
-    <SectionShell section={section} labelledBy={id} className="switcher">
+    <SectionShell section={section} labelledBy={id} className="switcher mx-4 my-8 rounded-[2.5rem] !bg-[#b7ace5] py-8">
       <div className="mx-auto w-full max-w-content px-3 sm:px-8">
-        <h2 id={id} className="mb-2 text-center text-sm font-bold tracking-[0.22em] text-ink-muted uppercase">
+        <h2 id={id} className="mb-4 text-center text-sm font-black tracking-[0.22em] text-[#4d2a80] uppercase">
           {title}
         </h2>
         <ProfessionalSwitcherClient cards={cards} activeSlug={profile.slug} showNames={site.switcher.showNames} label={title} />

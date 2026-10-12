@@ -33,7 +33,7 @@ export function SocialLinks({
   const keys = activeSocials(social)
   if (keys.length === 0) return null
   return (
-    <ul className={cn('flex flex-wrap items-center gap-1', className)} aria-label={`Redes sociales de ${owner}`}>
+    <ul className={cn('flex flex-wrap items-center justify-start gap-2', className)} aria-label={`Redes sociales de ${owner}`}>
       {keys.map((key) => {
         const { label, Icon } = META[key]
         return (
@@ -45,13 +45,13 @@ export function SocialLinks({
               external
               aria-label={`${label} de ${owner} (se abre en una pestaña nueva)`}
               className={cn(
-                'grid size-11 place-items-center rounded-full transition-[transform,background-color,color] duration-200 ease-out-expo hover:-translate-y-0.5 active:scale-95',
+                'grid size-13 place-items-center rounded-full transition-[transform,background-color,color] duration-200 ease-out-expo hover:-translate-y-0.5 active:scale-95',
                 tone === 'onBrand' && 'text-on-brand/90 hover:bg-on-brand/12 hover:text-on-brand',
                 tone === 'brand' && 'text-brand hover:bg-brand/10',
                 tone === 'ink' && 'text-ink hover:bg-ink/6',
               )}
             >
-              <Icon size={20} />
+              <Icon size={28} />
             </TrackedLink>
           </li>
         )
