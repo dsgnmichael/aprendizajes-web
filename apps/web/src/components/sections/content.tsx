@@ -2,6 +2,7 @@ import Image from 'next/image'
 import { ArrowUpRight, Clock, Mail, MapPin, Phone } from 'lucide-react'
 import { digitsOnly, whatsappUrl } from '@repo/domain'
 import { AppointmentButton } from '@/components/appointment/AppointmentButton'
+import { AppointmentSlideButton } from '@/components/appointment/AppointmentSlideButton'
 import { SectionHeading, SectionShell } from '@/components/profile/SectionShell'
 import type { SectionProps } from '@/components/profile/types'
 import { WhatsAppIcon } from '@/components/ui/BrandIcons'
@@ -208,28 +209,21 @@ export function AppointmentCta({ section, ctx }: SectionProps<'appointmentCTA'>)
   const { profile, appointment } = ctx
   if (appointment.action.kind === 'disabled') return null
   const id = `h-${section.id}`
-  const onBrand = section.style.background === 'brand'
-  const label = section.content.buttonLabel || appointment.label
   return (
-    <SectionShell section={section} labelledBy={id} bleed className="py-10 md:py-16">
+    <SectionShell section={section} labelledBy={id} bleed className="!bg-[#d0c5ea] py-12 md:py-16">
       <div className={container}>
-        <div
-          className={cn(
-            'grain relative overflow-hidden rounded-panel px-6 py-12 text-center sm:px-12 md:py-16',
-            onBrand ? 'bg-brand-deep text-on-brand' : 'bg-surface text-ink shadow-lifted',
-          )}
-        >
-          <div aria-hidden="true" className="orbits absolute top-1/2 left-1/2 aspect-square w-[140%] -translate-x-1/2 -translate-y-1/2 opacity-60 md:w-[80%]" />
-          <p className={cn('script relative text-4xl md:text-5xl', onBrand ? 'text-brand-soft' : 'text-brand')}>{profile.name.split(' ')[0]}</p>
-          <h2 id={id} className="relative mx-auto mt-2 max-w-2xl text-[clamp(1.8rem,4.6vw,3rem)] leading-[1.05] font-black tracking-[-0.02em] text-balance">
+        <div className="text-center">
+          <p className="script text-4xl text-[#4d2a80] md:text-5xl">{profile.name.split(' ')[0]}</p>
+          <h2 id={id} className="mx-auto mt-2 max-w-2xl text-[clamp(1.8rem,4.6vw,3rem)] leading-[1.05] font-black tracking-[-0.02em] text-balance text-[#3c3c3b]">
             {section.content.title || '¿Conversamos?'}
           </h2>
           {section.content.description ? (
-            <p className={cn('relative mx-auto mt-4 max-w-xl text-lg', onBrand ? 'text-on-brand/80' : 'text-ink-muted')}>{section.content.description}</p>
+            <p className="mx-auto mt-4 max-w-xl text-lg text-[#3c3c3b]">{section.content.description}</p>
           ) : null}
-          <div className="relative mt-8 flex justify-center">
-            <AppointmentButton action={appointment.action} label={label} slug={profile.slug} placement="cta-section" tone={onBrand ? 'light' : 'brand'} magnetic className="max-sm:w-full" />
+          <div className="mx-auto mt-8 w-full max-w-md">
+            <AppointmentSlideButton action={appointment.action} label={'Desliza para\nagendar'} slug={profile.slug} placement="cta-section" />
           </div>
+          <p className="mt-4 text-sm font-medium text-[#3c3c3b]">Conversación sin costo</p>
         </div>
       </div>
     </SectionShell>

@@ -131,7 +131,7 @@ export function Hero({ section, ctx }: SectionProps<'hero'>) {
           {/* RIGHT: image column (fills entire height of left column) */}
           <div className="flex items-center justify-center">
             <div className="relative w-full max-w-[380px] md:max-w-[420px] lg:max-w-[460px]">
-              <div className="motion-safe:animate-[float_5s_ease-in-out_infinite] w-full">
+              <div className="motion-safe:animate-[float_5s_ease-in-out_infinite] w-full max-md:origin-right max-md:scale-[1.15]">
               {hero && desktopImg ? (
                 <picture>
                   {mobileImg ? <source media="(max-width: 767px)" srcSet={mobileImg.srcSet} sizes={mobileImg.sizes} /> : null}

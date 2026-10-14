@@ -38,8 +38,8 @@ export function AppointmentButton({
   if (action.kind === 'disabled') return null
 
   const classes = cn(
-    'group inline-flex min-h-12 items-center justify-center gap-2.5 rounded-button font-black tracking-wide uppercase transition-[background-color,transform,box-shadow] duration-300 ease-out-expo active:scale-[0.97]',
-    size === 'lg' ? 'px-7 py-4 text-[0.95rem]' : 'px-5 py-3 text-sm',
+    'group inline-flex min-h-12 items-center justify-center gap-1.5 sm:gap-2.5 rounded-button font-black tracking-wide uppercase transition-[background-color,transform,box-shadow] duration-300 ease-out-expo active:scale-[0.97]',
+    size === 'lg' ? 'px-4 py-4 text-xs whitespace-nowrap sm:px-7 sm:text-[0.95rem]' : 'px-5 py-3 text-sm',
     styles[tone],
     className,
   )

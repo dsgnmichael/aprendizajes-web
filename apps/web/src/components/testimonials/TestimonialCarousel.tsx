@@ -94,11 +94,12 @@ export function TestimonialCarousel({
   )
 
   // Auto-rotacion cada 4 segundos (pausa al pasar el mouse)
+  // setTimeout + index en deps: garantiza bucle infinito (vuelve del ultimo al primero)
   useEffect(() => {
     if (count < 2 || paused) return
-    const interval = setInterval(() => go(1), 4000)
-    return () => clearInterval(interval)
-  }, [count, paused, go])
+    const t = setTimeout(() => go(1), 4000)
+    return () => clearTimeout(t)
+  }, [count, paused, go, index])
 
   if (count === 0) return null
   const current = items[Math.min(index, count - 1)]!
@@ -254,7 +255,7 @@ export function TestimonialCarousel({
           </div>
         ) : null}
 
-        <div className="mt-5 flex flex-wrap items-center justify-between gap-3 text-xs text-ink-muted">
+        <div className="mt-5 flex flex-col gap-3 text-xs text-ink-muted">
           {feed.attributions.length > 0 ? (
             <div className="flex flex-col gap-1">
               <p className="inline-flex items-center gap-1.5">
@@ -272,7 +273,7 @@ export function TestimonialCarousel({
               href={addReview.href}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex min-h-12 items-center gap-2 rounded-full bg-brand px-6 py-3 font-black tracking-wide text-on-brand uppercase shadow-glow transition-transform duration-300 ease-out-expo hover:scale-105 hover:bg-[#8777b5] motion-safe:animate-[float_4s_ease-in-out_infinite]"
+              className="self-center inline-flex min-h-12 items-center gap-2 rounded-full bg-brand px-6 py-3 font-black tracking-wide text-on-brand uppercase shadow-glow transition-transform duration-300 ease-out-expo hover:scale-105 hover:bg-[#8777b5] motion-safe:animate-[float_4s_ease-in-out_infinite]"
             >
               <Star size={16} aria-hidden="true" className="fill-accent-warm text-accent-warm" />
               {addReview.label}
