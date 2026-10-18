@@ -312,7 +312,7 @@ export function toProfessionalCard(profile: PublicProfile): ProfessionalCard {
     professionalTitle: profile.professionalTitle,
     scriptTitle: profile.scriptTitle,
     avatar: profile.images.avatar ?? profile.images.profile,
-    hero: profile.images.hero,
+    hero: profile.images.hero ?? profile.images.profile,
     shortDescription: profile.shortDescription,
   }
 }

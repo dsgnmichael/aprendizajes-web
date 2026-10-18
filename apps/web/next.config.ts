@@ -64,6 +64,7 @@ const nextConfig: NextConfig = {
       { pathname: '/demo/**' },
       { pathname: '/brand/**' },
       { pathname: '/media/**' },
+      { pathname: '/img/**' },
     ],
     remotePatterns: [
       { protocol: 'https', hostname: '*.public.blob.vercel-storage.com' },

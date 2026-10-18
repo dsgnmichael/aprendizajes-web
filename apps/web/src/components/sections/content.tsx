@@ -220,10 +220,10 @@ export function AppointmentCta({ section, ctx }: SectionProps<'appointmentCTA'>)
           {section.content.description ? (
             <p className="mx-auto mt-4 max-w-xl text-lg text-[#3c3c3b]">{section.content.description}</p>
           ) : null}
-          <div className="mx-auto mt-8 w-full max-w-md">
+          <div className="mx-auto mt-8 w-full max-w-[345px]">
             <AppointmentSlideButton action={appointment.action} label={'Desliza para\nagendar'} slug={profile.slug} placement="cta-section" />
           </div>
-          <p className="mt-4 text-sm font-medium text-[#3c3c3b]">Conversación sin costo</p>
+          <p className="mt-4 text-sm font-bold italic text-[#3c3c3b]">Conversación sin costo</p>
         </div>
       </div>
     </SectionShell>

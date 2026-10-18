@@ -148,7 +148,7 @@ function ArrowButton({ side, onClick }: { side: 'start' | 'end'; onClick: () => 
     <div
       className={cn(
         'pointer-events-none absolute inset-y-0 z-10 flex items-center',
-        side === 'start' ? 'left-0 bg-gradient-to-r from-[#b7ace5] via-[#b7ace5]/80 pr-6' : 'right-0 bg-gradient-to-l from-[#b7ace5] via-[#b7ace5]/80 pl-6',
+        side === 'start' ? 'left-0 bg-gradient-to-r from-[#d0c5ea] via-[#d0c5ea]/80 pr-6' : 'right-0 bg-gradient-to-l from-[#d0c5ea] via-[#d0c5ea]/80 pl-6',
       )}
     >
       <button

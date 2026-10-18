@@ -1,4 +1,5 @@
 import type { SiteSettings } from '@repo/domain'
+import { Suspense } from 'react'
 import Image from 'next/image'
 import { SocialLinks } from '@/components/ui/SocialLinks'
 import { MobileMenu } from './MobileMenu'
@@ -55,7 +56,11 @@ export function Header({ site }: { site: SiteSettings }) {
           {items.length === 0 ? (
             <SocialLinks social={site.social} owner={site.organizationName} tone="ink" className="hidden md:flex" />
           ) : null}
-          {items.length > 0 ? <MobileMenu items={items} organizationName={site.organizationName} social={site.social} /> : null}
+          {items.length > 0 ? (
+            <Suspense fallback={<div className="-mr-2 size-11" />}>
+              <MobileMenu items={items} organizationName={site.organizationName} social={site.social} organization={site.organization} logo={site.logo ?? null} />
+            </Suspense>
+          ) : null}
         </div>
       </div>
     </header>

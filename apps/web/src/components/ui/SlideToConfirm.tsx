@@ -74,7 +74,7 @@ export function SlideToConfirm({
         )}
       >
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center pl-20">
-          <span className="text-center text-[0.72rem] leading-tight font-black tracking-[0.08em] text-white uppercase sm:text-[0.8rem]">
+          <span className="text-center text-[0.99rem] leading-tight font-black tracking-[0.08em] text-white uppercase sm:text-[1.1rem]">
             {label.split('\n').map((line, i) => (
               <span key={i} className="block whitespace-nowrap">
                 {line}

@@ -91,7 +91,7 @@ export function PainPoints({ section }: LandingSectionProps<'painPoints'>) {
   const cards = section.variant === 'cards'
   return (
     <SectionShell section={section} labelledBy={id}>
-      <div className={container}>
+      <div className={cn(container, 'scroll-mt-24')} id="que-te-suena-familiar">
         <Heading id={id} kicker={c.kicker} title={c.title} intro={c.intro} align={section.style.align} />
         <ul className={cn(cards ? 'grid gap-4 sm:grid-cols-2 lg:grid-cols-3' : 'grid gap-x-10 gap-y-6 md:grid-cols-2')}>
           {c.items.map((item) => (
@@ -140,7 +140,7 @@ export function ServicesOverview({ section }: LandingSectionProps<'servicesOverv
               <>
                 {featured ? (
                   <>
-                    <div aria-hidden="true" className="orbits absolute -right-1/3 -bottom-1/2 aspect-square w-[110%] opacity-70" />
+                    
                     <span aria-hidden="true" className="absolute top-1/2 right-[8%] hidden -translate-y-[60%] text-on-brand/[0.13] lg:block">
                       <Icon name={item.icon} size={260} />
                     </span>
@@ -181,7 +181,7 @@ export function ServicesOverview({ section }: LandingSectionProps<'servicesOverv
             )
             const classes = cn(
               'group relative flex h-full flex-col overflow-hidden rounded-card p-7 transition-[transform,box-shadow] duration-500 ease-out-expo hover:-translate-y-1 md:p-8',
-              featured ? 'grain bg-brand text-on-brand shadow-glow' : 'bg-surface shadow-soft hover:shadow-lifted',
+              featured ? 'grain bg-gradient-to-b from-[#4d2a80] to-[#8777b5] text-on-brand shadow-glow' : 'bg-surface shadow-soft hover:shadow-lifted',
             )
             return (
               <li key={item.id} className={cn('reveal', featured && 'sm:col-span-2 lg:row-span-2', stretch)}>
@@ -265,41 +265,35 @@ export function TeamShowcase({ section, ctx }: LandingSectionProps<'teamShowcase
         <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <Heading id={id} kicker={c.kicker} title={c.title} intro={c.intro} />
           <div className="reveal mb-12 shrink-0 md:mb-16">
-            <CtaLink href="/equipo" placement="landing-team" tone="outline">
+            <a
+              href="/equipo"
+              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-white px-6 py-3 text-[0.75rem] font-black tracking-wide text-[#4d2a80] uppercase shadow-xl transition-all duration-300 hover:scale-105 sm:text-sm"
+            >
               {c.ctaLabel || ctx.site.copy.switcherTitle}
-            </CtaLink>
+            </a>
           </div>
         </div>
       </div>
       <ul
         className={cn(
           rail
-            ? 'no-scrollbar flex snap-x snap-mandatory gap-5 overflow-x-auto px-5 pb-6 sm:px-8 lg:px-[max(2.5rem,calc((100vw-72rem)/2+2rem))]'
-            : `${container} grid gap-6 sm:grid-cols-2 lg:grid-cols-4`,
+            ? 'no-scrollbar flex snap-x snap-mandatory gap-5 overflow-x-auto px-5 pt-16 pb-6 sm:px-8 lg:px-[max(2.5rem,calc((100vw-72rem)/2+2rem))]'
+            : `${container} grid gap-6 pt-12 sm:grid-cols-2 lg:grid-cols-4`,
         )}
         aria-label="Profesionales del equipo"
       >
-        {cards.map((card, i) => (
-          <li key={card.id} className={cn('reveal', rail && 'w-[78%] shrink-0 snap-start sm:w-[44%] lg:w-[23%]')}>
-            <a href={`/${card.slug}`} className="group block rounded-panel focus-visible:outline-offset-8">
+        {cards.map((card) => (
+          <li key={card.id} className={cn('reveal', rail && 'w-[60%] shrink-0 snap-start sm:w-[44%] lg:w-[23%]')}>
+            <a href={`/${card.slug}`} className="group block rounded-panel text-center focus-visible:outline-offset-8">
               <div className="relative aspect-[4/5]">
-                <div
-                  aria-hidden="true"
-                  className={cn(
-                    'grain absolute inset-x-0 bottom-0 top-[18%] overflow-hidden rounded-t-full rounded-b-card transition-colors duration-500',
-                    i % 2 === 0 ? 'bg-brand group-hover:bg-brand-deep' : 'bg-brand-deep group-hover:bg-brand',
-                  )}
-                >
-                  <div className="orbits absolute -top-1/4 left-1/2 aspect-square w-[140%] -translate-x-1/2 opacity-70" />
-                </div>
                 {card.hero ? (
                   <Image
                     src={card.hero.url}
                     alt=""
                     fill
-                    sizes="(min-width: 1024px) 22vw, (min-width: 640px) 44vw, 78vw"
+                    sizes="(min-width: 1024px) 22vw, (min-width: 640px) 44vw, 60vw"
                     className={cn(
-                      'object-bottom transition-transform duration-700 ease-out-expo group-hover:-translate-y-2 group-hover:scale-[1.03]',
+                      'origin-bottom object-bottom transition-transform duration-700 ease-out-expo group-hover:-translate-y-2 group-hover:scale-105',
                       card.hero.hasAlpha ? 'object-contain drop-shadow-[0_24px_30px_rgb(20_8_40/0.35)]' : 'rounded-t-full object-cover',
                     )}
                     style={card.hero.hasAlpha ? undefined : { objectPosition: focalPosition(card.hero) }}
@@ -309,12 +303,9 @@ export function TeamShowcase({ section, ctx }: LandingSectionProps<'teamShowcase
                     {initials(card.name)}
                   </span>
                 )}
-                <span className="absolute right-4 bottom-4 grid size-11 place-items-center rounded-full bg-surface text-brand shadow-soft transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5">
-                  <ArrowUpRight size={20} aria-hidden="true" />
-                </span>
               </div>
-              <h3 className="mt-5 text-xl leading-none font-black tracking-tight uppercase italic">{card.name}</h3>
-              <p className="script mt-1 text-[1.9rem] leading-tight text-brand">{card.scriptTitle || card.professionalTitle}</p>
+              <h3 className="mt-5 text-center text-xl leading-none font-black tracking-tight uppercase italic">{card.name}</h3>
+              <p className="script mt-1 text-center text-[1.9rem] leading-tight text-brand">{card.scriptTitle || card.professionalTitle}</p>
             </a>
           </li>
         ))}
