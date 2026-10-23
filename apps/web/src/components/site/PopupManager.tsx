@@ -109,6 +109,9 @@ export function PopupManager() {
           className={`flex items-center gap-2 px-4 py-3 rounded-full shadow-2xl hover:scale-105 transition-all font-medium ${getButtonClass(activePopup.floatingButtonStyle)}`}
         >
           <Megaphone className="size-5 animate-pulse" />
+          ) : (
+            <div className="p-10 text-center bg-gray-100 rounded-lg">Imagen no válida en producción (fue subida en local). Por favor, actualízala en el admin.</div>
+          )}
           <span className="text-sm font-medium">Ver Publicidad</span>
         </button>
       </div>

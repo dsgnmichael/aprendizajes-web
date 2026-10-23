@@ -6,7 +6,7 @@ import { Plus, Trash2, Edit, Image as ImageIcon } from 'lucide-react'
 import { PopupForm } from './popup-form'
 import { deletePopupAction } from '@/app/(dashboard)/popups/actions'
 
-export function PopupsManager({ initialPopups, professionals }: { initialPopups: PopupDocument[], professionals: { slug: string, name: string, status: string }[] }) {
+export function PopupsManager({ initialPopups = [], professionals = [] }: { initialPopups?: PopupDocument[], professionals?: { slug: string, name: string, status: string }[] }) {
   const [popups, setPopups] = useState(initialPopups)
   const [isCreating, setIsCreating] = useState(false)
   const [editingPopup, setEditingPopup] = useState<PopupDocument | null>(null)

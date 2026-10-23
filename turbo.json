@@ -1,8 +1,17 @@
 {
   "$schema": "https://turborepo.com/schema.json",
   "ui": "stream",
-  "globalDependencies": [".env"],
-  "globalEnv": ["NODE_ENV"],
+  "globalDependencies": [
+    ".env"
+  ],
+  "globalEnv": [
+    "NODE_ENV",
+    "NEXTAUTH_SECRET",
+    "AUTH_SECRET",
+    "MONGODB_URI",
+    "BLOB_READ_WRITE_TOKEN",
+    "MEDIA_PROVIDER"
+  ],
   "globalPassThroughEnv": [
     "MONGODB_URI",
     "MONGODB_DB_NAME",
@@ -24,8 +33,14 @@
   ],
   "tasks": {
     "build": {
-      "dependsOn": ["^build"],
-      "outputs": [".next/**", "!.next/cache/**", "dist/**"]
+      "dependsOn": [
+        "^build"
+      ],
+      "outputs": [
+        ".next/**",
+        "!.next/cache/**",
+        "dist/**"
+      ]
     },
     "dev": {
       "cache": false,
@@ -34,16 +49,24 @@
     "start": {
       "cache": false,
       "persistent": true,
-      "dependsOn": ["build"]
+      "dependsOn": [
+        "build"
+      ]
     },
     "lint": {
-      "dependsOn": ["^lint"]
+      "dependsOn": [
+        "^lint"
+      ]
     },
     "typecheck": {
-      "dependsOn": ["^typecheck"]
+      "dependsOn": [
+        "^typecheck"
+      ]
     },
     "test": {
-      "outputs": ["coverage/**"]
+      "outputs": [
+        "coverage/**"
+      ]
     }
   }
 }
