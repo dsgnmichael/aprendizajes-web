@@ -28,12 +28,12 @@ export function PopupForm({
   const [activeButtonIndex, setActiveButtonIndex] = useState<number | null>(null)
 
   const methods = useForm<PopupInput>({
-    resolver: zodResolver(popupInputSchema),
+    resolver: zodResolver(popupInputSchema) as any,
     defaultValues: initialData || {
       name: '',
       targetPath: '/',
       autoCloseSeconds: 0,
-      image: undefined,
+      image: undefined as any,
       buttons: [],
       active: true,
       floatingButtonStyle: 'dark',
@@ -50,7 +50,7 @@ export function PopupForm({
   const image = watch('image')
   const buttons = watch('buttons')
 
-  const onSubmit = async (data: PopupInput) => {
+  const onSubmit = async (data: any) => {
     setLoading(true)
     setError('')
 
