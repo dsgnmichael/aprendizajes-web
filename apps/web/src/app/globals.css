@@ -281,3 +281,23 @@
     opacity: 0;
   }
 }
+
+
+/* Animación para el botón flotante de publicidad */
+@keyframes grow-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.08); box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4); }
+}
+.animate-grow-pulse {
+  animation: grow-pulse 2s ease-in-out infinite;
+}
+
+
+/* Animación para los botones dentro del Popup */
+@keyframes popup-btn-grow {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); }
+  50% { transform: translate(-50%, -50%) scale(1.08); }
+}
+.animate-popup-btn-grow {
+  animation: popup-btn-grow 2s ease-in-out infinite;
+}

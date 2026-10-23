@@ -14,6 +14,7 @@ export interface NavItem {
     | 'settings'
     | 'users'
     | 'audit'
+    | 'popups'
   permission: Permission
 }
 
@@ -24,6 +25,12 @@ export const NAV_ITEMS: NavItem[] = [
     label: 'Página de inicio',
     icon: 'homePage',
     permission: 'landing:write',
+  },
+  {
+    href: '/popups',
+    label: 'Publicidad emergente',
+    icon: 'popups',
+    permission: 'settings:write',
   },
   {
     href: '/professionals',

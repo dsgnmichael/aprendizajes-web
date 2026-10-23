@@ -5,6 +5,7 @@ import type { CSSProperties, ReactNode } from 'react'
 import { Footer } from '@/components/site/Footer'
 import { Header } from '@/components/site/Header'
 import { getCurrentYear, getSite } from '@/lib/data'
+import { PopupManager } from '@/components/site/PopupManager'
 import { lato, loverine } from '@/lib/fonts'
 import { siteUrl } from '@/lib/site-url'
 import './globals.css'
@@ -71,6 +72,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
             </Script>
           </>
         ) : null}
+                <PopupManager />
       </body>
     </html>
   )

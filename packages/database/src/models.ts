@@ -10,6 +10,7 @@ import type {
   PublicProfile,
   Role,
   SiteSettings,
+  PopupDocument,
   TestimonialDocument,
 } from '@repo/domain'
 
@@ -141,3 +142,5 @@ export interface HomePageRevisionModel {
   publishedBy: string
   page: PublicHomePage
 }
+
+export type PopupModel = WithObjectId<PopupDocument>

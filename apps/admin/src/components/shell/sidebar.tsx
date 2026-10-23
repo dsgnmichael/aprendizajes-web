@@ -13,6 +13,7 @@ import {
   Settings2,
   ShieldCheck,
   UsersRound,
+  Megaphone,
 } from 'lucide-react'
 import { cn } from '@repo/ui/lib/utils'
 import type { NavItem } from './nav'
@@ -22,6 +23,7 @@ const ICONS = {
   homePage: PanelsTopLeft,
   professionals: UsersRound,
   testimonials: MessageSquareQuote,
+  popups: Megaphone,
   appointments: CalendarClock,
   integrations: PlugZap,
   media: ImageIcon,

@@ -16,6 +16,7 @@ import type {
   SiteSettingsModel,
   TestimonialModel,
   UserModel,
+  PopupModel,
 } from './models'
 
 export interface Collections {
@@ -33,6 +34,7 @@ export interface Collections {
   media: Collection<MediaModel>
   auditLogs: Collection<AuditLogModel>
   rateLimits: Collection<RateLimitModel>
+  popups: Collection<PopupModel>
 }
 
 export function collectionsFor(db: Db): Collections {
@@ -51,6 +53,7 @@ export function collectionsFor(db: Db): Collections {
     media: db.collection<MediaModel>(COLLECTIONS.media),
     auditLogs: db.collection<AuditLogModel>(COLLECTIONS.auditLogs),
     rateLimits: db.collection<RateLimitModel>(COLLECTIONS.rateLimits),
+    popups: db.collection<PopupModel>(COLLECTIONS.popups),
   }
 }
 

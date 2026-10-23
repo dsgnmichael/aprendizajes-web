@@ -12,3 +12,5 @@ export * from './repositories/integrations'
 export * from './repositories/rate-limit'
 export * from './repositories/dashboard'
 export * from './repositories/home-page'
+
+export * from './repositories/popups'

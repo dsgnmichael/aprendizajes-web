@@ -143,6 +143,7 @@ export const COLLECTIONS = {
   integrations: 'integrations',
   media: 'media',
   auditLogs: 'auditLogs',
+  popups: 'popups',
   rateLimits: 'rateLimits',
 } as const
 
