@@ -17,7 +17,11 @@ export default async function PopupsPage() {
       listPopups(),
       listProfessionals({ status: 'all' }),
     ])
-    popups = p.map(popup => ({ ...popup, createdAt: popup.createdAt.toISOString(), updatedAt: popup.updatedAt.toISOString() })) as any[]
+    popups = p.map(popup => ({ 
+      ...popup, 
+      createdAt: popup.createdAt instanceof Date ? popup.createdAt.toISOString() : (popup.createdAt || new Date().toISOString()), 
+      updatedAt: popup.updatedAt instanceof Date ? popup.updatedAt.toISOString() : (popup.updatedAt || new Date().toISOString()) 
+    })) as any[]
     professionals = prof
   } catch (error: any) {
     console.error("Error loading popups:", error)
