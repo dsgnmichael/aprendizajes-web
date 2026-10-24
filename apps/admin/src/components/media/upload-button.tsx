@@ -7,7 +7,6 @@ import { MEDIA_LIMITS } from '@repo/domain'
 import { Button } from '@repo/ui/components/button'
 import { toast } from '@repo/ui/components/sonner'
 import { saveMediaMetadataAction, type MediaItem } from '@/actions/media'
-import { handleResult } from '@/components/use-action-toast'
 
 export function UploadButton({
   folder = 'professionals',
@@ -46,17 +45,16 @@ export function UploadButton({
 
     startTransition(async () => {
       try {
-        // 1. Obtener dimensiones en el cliente
         const { width, height } = await getDimensions(file)
 
-        // 2. Subir directo a Vercel Blob (evita el límite de 4.5MB de Vercel)
+        // Sube directo a Vercel Blob (esquiva el límite de 4.5MB)
         const blob = await upload(file.name, file, {
           access: 'public',
           handleUploadUrl: '/api/upload',
         })
 
-        // 3. Guardar los metadatos en MongoDB
-        const item = handleResult(await saveMediaMetadataAction({
+        // Guarda los metadatos en MongoDB usando runAction
+        const result = await saveMediaMetadataAction({
           url: blob.url,
           filename: file.name,
           mimeType: file.type,
@@ -65,9 +63,14 @@ export function UploadButton({
           height,
           hasAlpha: file.type === 'image/png' || file.type === 'image/webp',
           folder: folder,
-        }) as any, 'Imagen subida correctamente') as any
+        })
 
-        if (item) onUploaded(item)
+        if (!result.ok) {
+          throw new Error(result.error)
+        }
+
+        toast.success('Imagen subida correctamente')
+        onUploaded(result.data as any)
       } catch (error: any) {
         toast.error(error.message || 'Error al subir la imagen')
       }

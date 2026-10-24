@@ -1,11 +1,9 @@
-import { collections, ObjectId } from '@repo/database'
-import { requirePermission, toActor } from '@/lib/auth'
-import { recordAudit } from '@repo/data-access'
-
 'use server'
 
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
+import { collections, ObjectId } from '@repo/database'
+import { recordAudit } from '@repo/data-access'
 import {
   deleteMediaRecord,
   hitRateLimit,
@@ -30,11 +28,6 @@ function serialize(m: MediaDocument): MediaItem {
   return { ...m, createdAt: m.createdAt.toISOString() }
 }
 
-/**
- * Upload handler: the file is DECODED and re-encoded server-side (sharp),
- * so the declared mime/extension is never trusted. Only metadata + URL are
- * stored in MongoDB; the binary goes to the configured MediaStorage.
- */
 export async function uploadMediaAction(formData: FormData) {
   return runAction('media:write', async (user) => {
     const limit = await hitRateLimit(`media:upload:${user.id}`, 60, 3600)
@@ -99,7 +92,6 @@ export async function updateMediaAction(id: string, input: unknown) {
 export async function deleteMediaAction(id: string) {
   return runAction('media:write', async (user) => {
     const removed = await deleteMediaRecord(objectIdSchema.parse(id), toActor(user))
-    // Delete from the storage the file was written to (static demo assets are left alone).
     if (removed.provider === 'local') await localStorage.delete(removed.key, removed.url)
     if (removed.provider === 'vercel-blob') await vercelBlobStorage.delete(removed.key, removed.url)
     revalidatePath('/media')
@@ -109,10 +101,6 @@ export async function deleteMediaAction(id: string) {
 
 const LOGO_MAX_BYTES = 600 * 1024
 
-/**
- * Returns the site logo as a data URL so the QR canvas stays same-origin
- * (a cross-origin image would taint the canvas and block PNG export).
- */
 export async function qrLogoDataUrlAction(url: string) {
   return runAction('professionals:read', async () => {
     const parsed = z.url({ protocol: /^https?$/ }).parse(url)
@@ -132,6 +120,7 @@ export async function qrLogoDataUrlAction(url: string) {
   })
 }
 
+// Función optimizada para recibir la imagen que ya se subió a Vercel Blob
 export async function saveMediaMetadataAction(data: {
   url: string;
   filename: string;
@@ -143,37 +132,39 @@ export async function saveMediaMetadataAction(data: {
   folder: string;
   alt?: string;
 }) {
-  const user = await requirePermission('media:write')
-  const actor = toActor(user)
-  const c = await collections()
+  return runAction('media:write', async (user) => {
+    const actor = toActor(user)
+    const c = await collections()
 
-  const now = new Date()
-  const _id = new ObjectId()
-  const doc = {
-    _id,
-    provider: 'vercel-blob',
-    key: data.filename,
-    url: data.url,
-    filename: data.filename,
-    mimeType: data.mimeType,
-    size: data.size,
-    width: data.width,
-    height: data.height,
-    hasAlpha: data.hasAlpha,
-    alt: data.alt || '',
-    focalX: 50,
-    focalY: 50,
-    folder: data.folder,
-    createdAt: now,
-    uploadedBy: actor.email,
-  }
+    const now = new Date()
+    const _id = new ObjectId()
+    const doc = {
+      _id,
+      provider: 'vercel-blob',
+      key: data.filename,
+      url: data.url,
+      filename: data.filename,
+      mimeType: data.mimeType,
+      size: data.size,
+      width: data.width,
+      height: data.height,
+      hasAlpha: data.hasAlpha,
+      alt: data.alt || '',
+      focalX: 50,
+      focalY: 50,
+      folder: data.folder,
+      createdAt: now,
+      uploadedBy: actor.email,
+    }
 
-  await c.media.insertOne(doc as any)
-  await recordAudit(actor, 'media.uploaded', 'media', _id.toHexString(), { filename: data.filename })
+    await c.media.insertOne(doc as any)
+    await recordAudit(actor, 'media.uploaded', 'media', _id.toHexString(), { filename: data.filename })
+    revalidatePath('/media')
 
-  return {
-    ...doc,
-    id: _id.toHexString(),
-    ok: true
-  }
+    return {
+      ...doc,
+      id: _id.toHexString(),
+      createdAt: now.toISOString()
+    }
+  })
 }
