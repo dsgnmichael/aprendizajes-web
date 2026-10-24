@@ -20,23 +20,22 @@ export function PopupManager() {
   const [isPaused, setIsPaused] = useState(false)
   const [timeLeft, setTimeLeft] = useState(0)
   const [currentSlide, setCurrentSlide] = useState(0)
-  const [direction, setDirection] = useState(1)
 
-  // Normalizar las diapositivas (slides)
   const slides: PopupSlide[] = useMemo(() => {
     if (!activePopup) return []
-    // Si tiene la nueva estructura (varias imágenes), la usamos
     if (activePopup.slides && activePopup.slides.length > 0) {
       return activePopup.slides
     }
-    // Si es un popup viejo (solo una imagen), la adaptamos a slide
     if (activePopup.image) {
-      return [{ id: 'legacy', image: activePopup.image, buttons: activePopup.buttons || [] }]
+      return [{ id: 'legacy', image: activePopup.image, buttons: [] }]
     }
     return []
   }, [activePopup])
 
   const activeSlide = slides[currentSlide] ?? slides[0]
+
+  // Duración total = tiempo por imagen * cantidad de imágenes
+  const totalDuration = activePopup ? activePopup.autoCloseSeconds * slides.length : 0
 
   const handleClose = useCallback(() => {
     setIsMinimizing(true)
@@ -84,7 +83,8 @@ export function PopupManager() {
         setIsMinimizing(false)
         setIsPaused(false)
         setCurrentSlide(0)
-        setTimeLeft(match.autoCloseSeconds)
+        // Inicializar el tiempo total del carrusel
+        setTimeLeft(match.autoCloseSeconds * (match.slides?.length || 1))
         track('popup_shown', { name: match.name, id: match.id })
       }, 3000)
 
@@ -95,7 +95,7 @@ export function PopupManager() {
     }
   }, [pathname, popups, loading])
 
-  // Temporizador y avance de carrusel
+  // Manejar la cuenta regresiva y el cambio de slide automático
   useEffect(() => {
     if (!shouldShow || !activePopup || isMinimized || isMinimizing || isPaused || activePopup.autoCloseSeconds <= 0 || timeLeft <= 0) return
     
@@ -103,22 +103,25 @@ export function PopupManager() {
       setTimeLeft((prev) => {
         if (prev <= 1) {
           clearInterval(timer)
-          // Si hay más de una imagen, pasamos a la siguiente
-          if (slides.length > 1) {
-            setDirection(1)
-            setCurrentSlide((s) => (s + 1) % slides.length)
-            return activePopup.autoCloseSeconds // Reiniciar tiempo
-          } else {
-            handleClose()
-            return 0
-          }
+          handleClose()
+          return 0
         }
-        return prev - 1
+        
+        const nextTime = prev - 1
+        const elapsed = totalDuration - nextTime
+        const expectedSlide = Math.floor(elapsed / activePopup.autoCloseSeconds)
+        
+        // Si el tiempo transcurrido indica que debemos cambiar de slide
+        if (expectedSlide > currentSlide && expectedSlide < slides.length) {
+          setCurrentSlide(expectedSlide)
+        }
+        
+        return nextTime
       })
     }, 1000)
     
     return () => clearInterval(timer)
-  }, [shouldShow, activePopup, isMinimized, isMinimizing, isPaused, timeLeft, slides.length, handleClose])
+  }, [shouldShow, activePopup, isMinimized, isMinimizing, isPaused, timeLeft, totalDuration, currentSlide, slides.length, handleClose])
 
   useEffect(() => {
     if (isMinimizing) {
@@ -145,7 +148,7 @@ export function PopupManager() {
     setIsPaused(false)
     setShouldShow(true)
     if (activePopup) {
-      setTimeLeft(activePopup.autoCloseSeconds)
+      setTimeLeft(totalDuration - (currentSlide * activePopup.autoCloseSeconds))
       track('popup_restored', { name: activePopup.name, id: activePopup.id })
     }
   }
@@ -183,20 +186,22 @@ export function PopupManager() {
 
   if (!shouldShow) return null
 
-  const progressPercent = activePopup.autoCloseSeconds > 0 
-    ? ((activePopup.autoCloseSeconds - timeLeft) / activePopup.autoCloseSeconds) * 100 
+  const progressPercent = totalDuration > 0 
+    ? ((totalDuration - timeLeft) / totalDuration) * 100 
     : 100
 
   const hasMultipleSlides = slides.length > 1
 
   const nextSlide = () => {
-    setDirection(1)
-    setCurrentSlide((s) => (s + 1) % slides.length)
+    const next = (currentSlide + 1) % slides.length
+    setCurrentSlide(next)
+    setTimeLeft(totalDuration - (next * activePopup.autoCloseSeconds))
   }
 
   const prevSlide = () => {
-    setDirection(-1)
-    setCurrentSlide((s) => (s - 1 + slides.length) % slides.length)
+    const prev = (currentSlide - 1 + slides.length) % slides.length
+    setCurrentSlide(prev)
+    setTimeLeft(totalDuration - (prev * activePopup.autoCloseSeconds))
   }
 
   const handleDragEnd = (_: unknown, info: PanInfo) => {
@@ -216,13 +221,13 @@ export function PopupManager() {
       >
         <div 
           onClick={(e) => e.stopPropagation()}
-          className={`relative w-full max-w-2xl transition-all duration-500 ease-in-out origin-bottom-right ${
+          style={{ aspectRatio: slides[0]?.image?.width && slides[0]?.image?.height ? `${slides[0].image.width} / ${slides[0].image.height}` : '4 / 5' }}
+          className={`relative max-h-[85vh] w-auto max-w-[90vw] sm:max-w-[60vw] transition-all duration-500 ease-in-out origin-bottom-right ${
             isMinimizing 
               ? 'scale-0 opacity-0 translate-x-1/4 translate-y-1/4' 
               : 'scale-100 opacity-100'
           }`}
         >
-          {/* Controles Superiores */}
           <div className="absolute -top-12 right-0 flex items-center gap-2 z-50">
             {activePopup.autoCloseSeconds > 0 && (
               <button
@@ -242,86 +247,84 @@ export function PopupManager() {
             </button>
           </div>
 
-          {/* Contenedor del Carrusel */}
-          <div className="relative overflow-hidden rounded-xl bg-white shadow-2xl w-full text-center">
-            
+          <div className="relative overflow-hidden rounded-xl bg-transparent shadow-2xl h-full w-full">
             <m.div
-              key={currentSlide}
+              className="flex h-full w-full cursor-grab active:cursor-grabbing select-none"
+              animate={{ x: `-${currentSlide * 100}%` }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
               drag={hasMultipleSlides ? 'x' : false}
               dragConstraints={{ left: 0, right: 0 }}
               dragElastic={0.2}
               onDragEnd={handleDragEnd}
-              initial={{ opacity: 0, x: direction * 40 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: direction * -40 }}
-              transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-              className="relative w-full h-full cursor-grab active:cursor-grabbing"
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={activeSlide.image.url}
-                alt={activePopup.name}
-                className="max-h-[80vh] w-auto max-w-full object-contain mx-auto block min-h-[200px] select-none"
-                draggable={false}
-              />
-              
-              {(activePopup.buttons || []).map((btn) => (
-                <a
-                  key={btn.id}
-                  href={btn.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={() => handleButtonClick(btn.label)}
-                  className={`absolute rounded-full px-6 py-2.5 text-sm font-bold shadow-lg animate-popup-btn-grow ${getButtonClass(btn.style)}`}
-                  style={{
-                    left: `${btn.x}%`,
-                    top: `${btn.y}%`,
-                    transform: 'translate(-50%, -50%)',
-                  }}
-                >
-                  {btn.label}
-                </a>
-              ))}
-              {activeSlide.buttons?.map((btn) => (
-                <a
-                  key={btn.id}
-                  href={btn.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={() => handleButtonClick(btn.label)}
-                  className={`absolute rounded-full px-6 py-2.5 text-sm font-bold shadow-lg animate-popup-btn-grow ${getButtonClass(btn.style)}`}
-                  style={{
-                    left: `${btn.x}%`,
-                    top: `${btn.y}%`,
-                    transform: 'translate(-50%, -50%)',
-                  }}
-                >
-                  {btn.label}
-                </a>
+              {slides.map((slide) => (
+                <div key={slide.id} className="relative w-full h-full flex-shrink-0 flex items-center justify-center">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={slide.image.url}
+                    alt={activePopup.name}
+                    className="w-full h-full object-contain select-none pointer-events-none"
+                    draggable={false}
+                  />
+                  
+                  {(activePopup.buttons || []).map((btn) => (
+                    <a
+                      key={btn.id}
+                      href={btn.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => handleButtonClick(btn.label)}
+                      className={`absolute rounded-full px-5 py-2 text-[0.8rem] font-bold shadow-lg animate-popup-btn-grow ${getButtonClass(btn.style)}`}
+                      style={{
+                        left: `${btn.x}%`,
+                        top: `${btn.y}%`,
+                        transform: 'translate(-50%, -50%)',
+                      }}
+                    >
+                      {btn.label}
+                    </a>
+                  ))}
+
+                  {slide.buttons?.map((btn) => (
+                    <a
+                      key={btn.id}
+                      href={btn.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => handleButtonClick(btn.label)}
+                      className={`absolute rounded-full px-5 py-2 text-[0.8rem] font-bold shadow-lg animate-popup-btn-grow ${getButtonClass(btn.style)}`}
+                      style={{
+                        left: `${btn.x}%`,
+                        top: `${btn.y}%`,
+                        transform: 'translate(-50%, -50%)',
+                      }}
+                    >
+                      {btn.label}
+                    </a>
+                  ))}
+                </div>
               ))}
             </m.div>
 
-            {/* Flechas de navegación (solo si hay más de 1) */}
             {hasMultipleSlides && (
               <>
-                <button onClick={prevSlide} className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-black p-2 rounded-full shadow-md z-10 transition-transform hover:scale-110">
+                <button onClick={prevSlide} className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-black p-2 rounded-full shadow-xl z-20 transition-transform hover:scale-110">
                   <ChevronLeft className="size-6" />
                 </button>
-                <button onClick={nextSlide} className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-black p-2 rounded-full shadow-md z-10 transition-transform hover:scale-110">
+                <button onClick={nextSlide} className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-black p-2 rounded-full shadow-xl z-20 transition-transform hover:scale-110">
                   <ChevronRight className="size-6" />
                 </button>
               </>
             )}
 
-            {/* Indicadores (Puntos) */}
             {hasMultipleSlides && (
               <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 z-10">
                 {slides.map((_, i) => (
                   <button
                     key={i}
                     onClick={() => {
-                      setDirection(i > currentSlide ? 1 : -1)
                       setCurrentSlide(i)
+                      setTimeLeft(totalDuration - (i * activePopup.autoCloseSeconds))
                     }}
                     className={`h-2 rounded-full transition-all duration-300 ${
                       i === currentSlide ? 'w-6 bg-[#5b21b6]' : 'w-2 bg-[#5b21b6]/40 hover:bg-[#5b21b6]/60'
@@ -332,7 +335,6 @@ export function PopupManager() {
               </div>
             )}
 
-            {/* Barra de progreso (temporizador) */}
             {activePopup.autoCloseSeconds > 0 && (
               <div className="absolute bottom-0 left-0 h-1.5 w-full bg-black/10 z-0">
                 <div 
