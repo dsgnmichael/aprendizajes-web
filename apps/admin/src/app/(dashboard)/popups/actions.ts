@@ -16,7 +16,7 @@ export async function createPopupAction(data: PopupInput) {
     await createPopup(parsed.data, actor)
     revalidatePath('/popups')
     return { success: true }
-  } catch (error) {
+  } catch (_error) {
     return { error: 'Error al crear el popup' }
   }
 }
@@ -32,7 +32,7 @@ export async function updatePopupAction(id: string, data: PopupInput) {
     await updatePopup(id, parsed.data, actor)
     revalidatePath('/popups')
     return { success: true }
-  } catch (error) {
+  } catch (_error) {
     return { error: 'Error al actualizar el popup' }
   }
 }
@@ -45,7 +45,7 @@ export async function deletePopupAction(id: string) {
     await deletePopup(id, actor)
     revalidatePath('/popups')
     return { success: true }
-  } catch (error) {
+  } catch (_error) {
     return { error: 'Error al eliminar el popup' }
   }
 }

@@ -157,6 +157,7 @@ export async function saveMediaMetadataAction(data: {
       uploadedBy: actor.email,
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await c.media.insertOne(doc as any)
     await recordAudit(actor, 'media.uploaded', 'media', _id.toHexString(), { filename: data.filename })
     revalidatePath('/media')

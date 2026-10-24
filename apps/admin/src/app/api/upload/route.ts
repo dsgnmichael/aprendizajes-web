@@ -8,16 +8,18 @@ export async function POST(request: Request): Promise<NextResponse> {
     const jsonResponse = await handleUpload({
       body,
       request,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       onBeforeGenerateToken: async (pathname) => {
         // Aquí podrías validar la sesión del usuario para mayor seguridad
         // const user = await requirePermission('media:write')
         return {
           allowedContentTypes: ['image/jpeg', 'image/png', 'image/webp', 'image/gif'],
           maximumSizeInBytes: 10 * 1024 * 1024, // 10 MB (límite del lado del cliente)
+          allowOverwrite: true, // <-- CLAVE: Permite sobrescribir el archivo si ya existe
         }
       },
       onUploadCompleted: async ({ blob }) => {
-        console.log('Upload completed:', blob.url)
+        console.info('Upload completed:', blob.url)
         // Opcional: guardar en tu base de datos que se subió una imagen
       },
     })

@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { httpsUrlSchema, mediaRefSchema, text } from './common'
+import { mediaRefSchema, text } from './common'
 
 export const BUTTON_STYLES = ['dark', 'light', 'white'] as const
 export type ButtonStyle = typeof BUTTON_STYLES[number]

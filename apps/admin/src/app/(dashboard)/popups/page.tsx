@@ -8,7 +8,9 @@ export const metadata = { title: 'Publicidad emergente' }
 export default async function PopupsPage() {
   await requirePermission('settings:write')
   
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let popups: any[] = []
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let professionals: any[] = []
   let errorMsg = ''
 
@@ -21,8 +23,10 @@ export default async function PopupsPage() {
       ...popup, 
       createdAt: popup.createdAt instanceof Date ? popup.createdAt.toISOString() : (popup.createdAt || new Date().toISOString()), 
       updatedAt: popup.updatedAt instanceof Date ? popup.updatedAt.toISOString() : (popup.updatedAt || new Date().toISOString()) 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     })) as any[]
     professionals = prof
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     console.error("Error loading popups:", error)
     errorMsg = error?.message || 'Error desconocido al conectar con la base de datos.'

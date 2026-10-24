@@ -1,4 +1,5 @@
 import { themeToCssVars } from '@repo/domain'
+import { Suspense } from 'react'
 import type { Metadata, Viewport } from 'next'
 import Script from 'next/script'
 import type { CSSProperties, ReactNode } from 'react'
@@ -72,7 +73,9 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
             </Script>
           </>
         ) : null}
-                <PopupManager />
+                <Suspense fallback={null}>
+                  <PopupManager />
+                </Suspense>
       </body>
     </html>
   )

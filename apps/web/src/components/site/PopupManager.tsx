@@ -1,9 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { usePathname } from 'next/navigation'
 import { X, Megaphone, Pause, Play } from 'lucide-react'
 import type { PopupDocument } from '@repo/domain'
+import { track } from '@/lib/analytics'
 
 export function PopupManager() {
   const pathname = usePathname()
@@ -11,12 +12,22 @@ export function PopupManager() {
   const [popups, setPopups] = useState<PopupDocument[]>([])
   const [loading, setLoading] = useState(true)
   
+  const [shouldShow, setShouldShow] = useState(false)
   const [isMinimized, setIsMinimized] = useState(false)
   const [isMinimizing, setIsMinimizing] = useState(false)
   const [isPaused, setIsPaused] = useState(false)
   const [timeLeft, setTimeLeft] = useState(0)
 
-  // Cargar popups
+  // 1. Declaramos handleClose ANTES de usarlo para evitar errores de referencia
+  const handleClose = useCallback(() => {
+    setIsMinimizing(true)
+    if (activePopup) {
+      sessionStorage.setItem('dismissed_popup_' + activePopup.id, 'true')
+      track('popup_closed', { name: activePopup.name, id: activePopup.id })
+    }
+  }, [activePopup])
+
+  // 2. Cargar popups desde la API
   useEffect(() => {
     async function load() {
       try {
@@ -34,31 +45,45 @@ export function PopupManager() {
     load()
   }, [])
 
-  // Evaluar ruta
+  // 3. Evaluar ruta y frecuencia
   useEffect(() => {
     if (loading) return
     const match = popups.find((p) => p.active && (p.targetPath === '*' || p.targetPath === pathname))
     
     if (match) {
-      setActivePopup(match)
-      setIsMinimized(false)
-      setIsMinimizing(false)
-      setIsPaused(false)
-      setTimeLeft(match.autoCloseSeconds)
+      const dismissedKey = 'dismissed_popup_' + match.id
+      if (sessionStorage.getItem(dismissedKey)) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setActivePopup(null)
+        return
+      }
+
+      const timer = setTimeout(() => {
+        setActivePopup(match)
+        setShouldShow(true)
+        setIsMinimized(false)
+        setIsMinimizing(false)
+        setIsPaused(false)
+        setTimeLeft(match.autoCloseSeconds)
+        track('popup_shown', { name: match.name, id: match.id })
+      }, 3000)
+
+      return () => clearTimeout(timer)
     } else {
       setActivePopup(null)
+      setShouldShow(false)
     }
   }, [pathname, popups, loading])
 
-  // Temporizador (se detiene si isPaused es true)
+  // 4. Temporizador
   useEffect(() => {
-    if (!activePopup || isMinimized || isMinimizing || isPaused || activePopup.autoCloseSeconds <= 0 || timeLeft <= 0) return
+    if (!shouldShow || !activePopup || isMinimized || isMinimizing || isPaused || activePopup.autoCloseSeconds <= 0 || timeLeft <= 0) return
     
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
           clearInterval(timer)
-          setIsMinimizing(true)
+          handleClose()
           return 0
         }
         return prev - 1
@@ -66,9 +91,9 @@ export function PopupManager() {
     }, 1000)
     
     return () => clearInterval(timer)
-  }, [activePopup, isMinimized, isMinimizing, isPaused, timeLeft])
+  }, [shouldShow, activePopup, isMinimized, isMinimizing, isPaused, timeLeft, handleClose])
 
-  // Efecto para finalizar la animación
+  // 5. Animación de minimizar
   useEffect(() => {
     if (isMinimizing) {
       const timer = setTimeout(() => {
@@ -79,11 +104,29 @@ export function PopupManager() {
     }
   }, [isMinimizing])
 
+  // 6. Cerrar con tecla Escape
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && shouldShow && !isMinimized && !isMinimizing) {
+        handleClose()
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [shouldShow, isMinimized, isMinimizing, handleClose])
+
   const handleRestore = () => {
     setIsMinimized(false)
     setIsPaused(false)
     if (activePopup) {
       setTimeLeft(activePopup.autoCloseSeconds)
+      track('popup_restored', { name: activePopup.name, id: activePopup.id })
+    }
+  }
+
+  const handleButtonClick = (label: string) => {
+    if (activePopup) {
+      track('popup_cta_click', { name: activePopup.name, id: activePopup.id, button: label })
     }
   }
 
@@ -96,23 +139,18 @@ export function PopupManager() {
     }
   }
 
-  if (!activePopup || !activePopup.image?.url) return null
+  if (!activePopup || !activePopup.image?.url || !shouldShow) return null
 
   // Vista Minimizada
   if (isMinimized) {
     return (
       <div className="fixed bottom-6 right-6 z-[99999] animate-in slide-in-from-bottom-5 fade-in duration-300">
-        {/* Efecto de onda expansiva detrás del botón */}
-        
         <button
           onClick={handleRestore}
-          className={`flex items-center gap-2 px-4 py-3 rounded-full shadow-2xl hover:scale-105 transition-all font-medium ${getButtonClass(activePopup.floatingButtonStyle)}`}
+          className={`flex items-center justify-center size-12 rounded-full shadow-lg hover:scale-110 transition-all opacity-70 hover:opacity-100 ${getButtonClass(activePopup.floatingButtonStyle)}`}
+          aria-label="Ver publicidad"
         >
           <Megaphone className="size-5 animate-pulse" />
-          ) : (
-            <div className="p-10 text-center bg-gray-100 rounded-lg">Imagen no válida en producción (fue subida en local). Por favor, actualízala en el admin.</div>
-          )}
-          <span className="text-sm font-medium">Ver Publicidad</span>
         </button>
       </div>
     )
@@ -124,6 +162,7 @@ export function PopupManager() {
 
   return (
     <div 
+      onClick={handleClose}
       className={`fixed inset-0 z-[99999] flex items-center justify-center p-4 transition-all duration-500 ${
         isMinimizing 
           ? 'bg-transparent pointer-events-none backdrop-blur-none' 
@@ -131,15 +170,14 @@ export function PopupManager() {
       }`}
     >
       <div 
+        onClick={(e) => e.stopPropagation()}
         className={`relative w-full max-w-2xl transition-all duration-500 ease-in-out origin-bottom-right ${
           isMinimizing 
             ? 'scale-0 opacity-0 translate-x-1/4 translate-y-1/4' 
             : 'scale-100 opacity-100'
         }`}
       >
-        {/* Controles Superiores */}
         <div className="absolute -top-12 right-0 flex items-center gap-2">
-          {/* Botón de Pausa (solo si hay tiempo de autocierre) */}
           {activePopup.autoCloseSeconds > 0 && (
             <button
               onClick={() => setIsPaused(!isPaused)}
@@ -150,17 +188,18 @@ export function PopupManager() {
             </button>
           )}
           
-          {/* Botón Cerrar */}
           <button
-            onClick={() => setIsMinimizing(true)}
+            onClick={handleClose}
             className="rounded-full bg-black/50 p-2 text-white hover:bg-black/80 transition-colors cursor-pointer"
-            aria-label="Minimizar publicidad"
+            aria-label="Cerrar publicidad"
           >
             <X className="size-6" />
           </button>
         </div>
         
         <div className="relative overflow-hidden rounded-xl bg-white shadow-2xl inline-block w-full text-center">
+          {/* Usamos <img> nativo intencionalmente para carga instantánea del popup (el procesamiento de <Image> causa retraso visual) */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={activePopup.image.url}
             alt={activePopup.name}
@@ -173,6 +212,7 @@ export function PopupManager() {
               href={btn.url}
               target="_blank"
               rel="noopener noreferrer"
+              onClick={() => handleButtonClick(btn.label)}
               className={`absolute rounded-full px-6 py-2.5 text-sm font-bold shadow-lg animate-popup-btn-grow ${getButtonClass(btn.style)}`}
               style={{
                 left: `${btn.x}%`,
@@ -184,7 +224,6 @@ export function PopupManager() {
             </a>
           ))}
 
-          {/* Barra de progreso */}
           {activePopup.autoCloseSeconds > 0 && (
             <div className="absolute bottom-0 left-0 h-1.5 w-full bg-black/20">
               <div 

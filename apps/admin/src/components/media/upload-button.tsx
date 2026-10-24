@@ -70,7 +70,9 @@ export function UploadButton({
         }
 
         toast.success('Imagen subida correctamente')
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         onUploaded(result.data as any)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error: any) {
         toast.error(error.message || 'Error al subir la imagen')
       }
