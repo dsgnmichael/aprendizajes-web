@@ -129,9 +129,7 @@ export async function qrLogoDataUrlAction(url: string) {
 }
 
 
-import { collections, ObjectId } from '@repo/database'
-import { requirePermission, toActor } from '@/lib/auth'
-import { recordAudit } from '@repo/data-access'
+
 
 export async function saveMediaMetadataAction(data: {
   url: string;
