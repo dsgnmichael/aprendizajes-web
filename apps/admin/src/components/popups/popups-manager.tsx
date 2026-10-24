@@ -58,7 +58,9 @@ export function PopupsManager({ initialPopups = [], professionals = [] }: { init
                 <h3 className="font-medium truncate">{popup.name}</h3>
                 <p className="text-xs text-muted-foreground">Ruta: {popup.targetPath}</p>
                 <p className="text-xs text-muted-foreground">
-                  {popup.buttons.length} {popup.buttons.length === 1 ? 'botón' : 'botones'}
+                  {popup.slides && popup.slides.length > 0 
+                    ? `${popup.slides.length} ${popup.slides.length === 1 ? 'diapositiva' : 'diapositivas'}` 
+                    : `${popup.buttons?.length || 0} ${(popup.buttons?.length || 0) === 1 ? 'botón' : 'botones'}`}
                 </p>
                 <span className={`inline-block mt-2 text-xs px-2 py-1 rounded-full ${popup.active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
                   {popup.active ? 'Activo' : 'Inactivo'}

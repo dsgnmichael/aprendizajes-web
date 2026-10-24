@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useForm, useFieldArray, FormProvider } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { type PopupDocument, popupInputSchema, type PopupInput } from '@repo/domain'
-import { Plus, Trash2, X, MousePointerClick } from 'lucide-react'
+import { Plus, Trash2, X, MousePointerClick, Image as ImageIcon } from 'lucide-react'
 import { createPopupAction, updatePopupAction } from '@/app/(dashboard)/popups/actions'
 import { ImageField } from '@/components/editor/image-field'
 import { Input } from '@repo/ui/components/input'
@@ -25,42 +25,87 @@ export function PopupForm({
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [activeSlideIndex, setActiveSlideIndex] = useState(0)
   const [activeButtonIndex, setActiveButtonIndex] = useState<number | null>(null)
+
+  // Mover los botones de las diapositivas antiguas a los botones globales
+  const initialSlides = initialData?.slides && initialData.slides.length > 0 
+    ? initialData.slides 
+    : initialData?.image ? [{ id: 'legacy', image: initialData.image, buttons: [] }] : []
+
+  const initialGlobalButtons = [
+    ...(initialData?.buttons || []),
+    ...(initialData?.slides?.flatMap(s => s.buttons || []) || [])
+  ]
+
+  const defaultValues: PopupInput = initialData ? {
+    ...initialData,
+    slides: initialSlides,
+    buttons: initialGlobalButtons
+  } : {
+    name: '',
+    targetPath: '/',
+    autoCloseSeconds: 0,
+    slides: [],
+    buttons: [],
+    active: true,
+    floatingButtonStyle: 'dark',
+  }
 
   const methods = useForm<PopupInput>({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     resolver: zodResolver(popupInputSchema) as any,
-    defaultValues: initialData || {
-      name: '',
-      targetPath: '/',
-      autoCloseSeconds: 0,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      image: undefined as any,
-      buttons: [],
-      active: true,
-      floatingButtonStyle: 'dark',
-    },
+    defaultValues,
   })
 
   const { register, control, handleSubmit, watch, setValue, formState: { errors } } = methods
 
-  const { fields, append, remove } = useFieldArray({
+  const { fields: globalButtons, append: appendGlobalButton, remove: removeGlobalButton } = useFieldArray({
     control,
     name: 'buttons',
   })
 
   // eslint-disable-next-line react-hooks/incompatible-library
-  const image = watch('image')
-  const buttons = watch('buttons')
+  const slides = watch('slides') || []
+  const currentSlide = slides[activeSlideIndex]
+  const globalButtonsWatch = watch('buttons') || []
+
+  const addSlide = () => {
+    const newSlide = {
+      id: Date.now().toString(),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      image: undefined as any,
+      buttons: []
+    }
+    setValue('slides', [...slides, newSlide])
+    setActiveSlideIndex(slides.length)
+  }
+
+  const removeSlide = (index: number) => {
+    const newSlides = [...slides]
+    newSlides.splice(index, 1)
+    setValue('slides', newSlides)
+    if (activeSlideIndex >= newSlides.length) {
+      setActiveSlideIndex(Math.max(0, newSlides.length - 1))
+    }
+  }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const onSubmit = async (data: any) => {
     setLoading(true)
     setError('')
 
+    // Limpiamos los botones de las diapositivas para usar solo los globales
+    const payload = {
+      ...data,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      slides: data.slides.map((s: any) => ({ ...s, buttons: [] })),
+      image: undefined
+    }
+
     const res = initialData
-      ? await updatePopupAction(initialData.id, data)
-      : await createPopupAction(data)
+      ? await updatePopupAction(initialData.id, payload)
+      : await createPopupAction(payload)
 
     if (res.error) {
       setError(res.error)
@@ -72,7 +117,7 @@ export function PopupForm({
   }
 
   const handleImageClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (activeButtonIndex === null || !buttons || activeButtonIndex >= buttons.length) return
+    if (activeButtonIndex === null || !globalButtonsWatch[activeButtonIndex]) return
 
     const rect = e.currentTarget.getBoundingClientRect()
     const x = Math.round(((e.clientX - rect.left) / rect.width) * 100)
@@ -82,7 +127,6 @@ export function PopupForm({
     setValue(`buttons.${activeButtonIndex}.y`, Math.max(0, Math.min(100, y)))
   }
 
-  {/* Función para previsualizar los colores de los botones en el admin */}
   const getButtonClass = (style: string | undefined) => {
     switch (style) {
       case 'light': return 'bg-purple-200 text-purple-900 border-transparent'
@@ -158,9 +202,48 @@ export function PopupForm({
                   <Label htmlFor="active-checkbox">Popup Activo</Label>
                 </div>
 
-                <div className="border p-4 rounded-md bg-muted/10">
-                  <ImageField name="image" label="Imagen del Popup" folder="site" aspect="aspect-video" />
+                <div className="border p-4 rounded-md bg-muted/10 space-y-3">
+                  <div className="flex justify-between items-center">
+                    <Label>Diapositivas</Label>
+                    <Button type="button" variant="outline" size="sm" onClick={addSlide}>
+                      <Plus className="size-4 mr-1" /> Agregar
+                    </Button>
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    {slides.map((slide, idx) => (
+                      <div 
+                        key={slide.id || idx} 
+                        className={cn(
+                          "flex items-center justify-between p-2 border rounded cursor-pointer",
+                          activeSlideIndex === idx ? "border-primary bg-primary/5" : "bg-background"
+                        )}
+                        onClick={() => setActiveSlideIndex(idx)}
+                      >
+                        <div className="flex items-center gap-2 truncate">
+                          {slide.image?.url ? (
+                            /* eslint-disable-next-line @next/next/no-img-element */
+                            <img src={slide.image.url} alt="thumb" className="size-8 rounded object-cover" />
+                          ) : (
+                            <div className="size-8 rounded bg-muted flex items-center justify-center"><ImageIcon className="size-4 text-muted-foreground" /></div>
+                          )}
+                          <span className="text-sm font-medium">Diapositiva {idx + 1}</span>
+                        </div>
+                        <Button type="button" variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); removeSlide(idx); }} className="text-destructive hover:bg-destructive/10 h-8 px-2">
+                          <Trash2 className="size-4" />
+                        </Button>
+                      </div>
+                    ))}
+                    {slides.length === 0 && (
+                      <p className="text-xs text-muted-foreground text-center py-2">No hay imágenes. Agrega una.</p>
+                    )}
+                  </div>
                 </div>
+
+                {slides.length > 0 && (
+                  <div className="border p-4 rounded-md bg-muted/10 mt-4">
+                    <ImageField name={`slides.${activeSlideIndex}.image`} label={`Imagen de la Diapositiva ${activeSlideIndex + 1}`} folder="site" aspect="aspect-video" />
+                  </div>
+                )}
               </div>
 
               {/* Columna Derecha (Previsualización) */}
@@ -172,20 +255,20 @@ export function PopupForm({
                       Posicionar Visualmente
                     </h3>
                     <p className="text-[11px] text-muted-foreground mb-2">
-                      1. Agrega un botón abajo. 2. Haz clic en él. 3. Clic en la imagen.
+                      1. Haz clic en un botón abajo. 2. Haz clic en la imagen para posicionarlo.
                     </p>
                   </div>
 
                   <div className="relative border-2 border-dashed rounded-lg overflow-hidden bg-[repeating-conic-gradient(#f2f1ef_0_25%,#fff_0_50%)] bg-[length:16px_16px] flex-1 min-h-[300px] flex items-center justify-center">
-                    {image?.url ? (
+                    {currentSlide?.image?.url ? (
                       <div 
                         className={cn("relative w-full h-full cursor-crosshair", activeButtonIndex !== null && "ring-2 ring-primary ring-inset")}
                         onClick={handleImageClick}
                       >
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={image.url} alt="Preview" className="w-full h-full object-contain pointer-events-none" />
+                        <img src={currentSlide.image.url} alt="Preview" className="w-full h-full object-contain pointer-events-none" />
                         
-                        {buttons?.map((btn, i) => (
+                        {globalButtonsWatch?.map((btn, i) => (
                           btn.x !== undefined && btn.y !== undefined && (
                             <div
                               key={btn.id}
@@ -202,31 +285,34 @@ export function PopupForm({
                         ))}
                       </div>
                     ) : (
-                      <p className="text-xs text-muted-foreground text-center px-4">Sube una imagen a la izquierda.</p>
+                      <p className="text-xs text-muted-foreground text-center px-4">Selecciona una diapositiva y sube una imagen a la izquierda.</p>
                     )}
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Lista de Botones */}
+            {/* Lista de Botones Globales */}
             <div className="border p-4 rounded-md">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-sm font-medium">Lista de Botones</h3>
+                <div>
+                  <h3 className="text-sm font-medium">Botones Globales</h3>
+                  <p className="text-[11px] text-muted-foreground">Estos botones aparecerán en TODAS las diapositivas.</p>
+                </div>
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
                   onClick={() => {
-                    append({ id: Date.now().toString(), label: '', url: '', style: 'dark', x: 50, y: 50 })
-                    setActiveButtonIndex(fields.length)
+                    appendGlobalButton({ id: Date.now().toString(), label: '', url: '', style: 'dark', x: 50, y: 50 })
+                    setActiveButtonIndex(globalButtons.length)
                   }}
                 >
                   <Plus className="size-4 mr-1" /> Agregar Botón
                 </Button>
               </div>
 
-              {fields.map((field, index) => (
+              {globalButtons.map((field, index) => (
                 <div 
                   key={field.id} 
                   className={cn(
@@ -266,7 +352,7 @@ export function PopupForm({
                       size="sm"
                       onClick={(e) => {
                         e.stopPropagation();
-                        remove(index);
+                        removeGlobalButton(index);
                         if (activeButtonIndex === index) setActiveButtonIndex(null);
                       }}
                       className="text-destructive hover:bg-destructive/10 h-8 px-2"
@@ -276,6 +362,9 @@ export function PopupForm({
                   </div>
                 </div>
               ))}
+              {globalButtons.length === 0 && (
+                <p className="text-xs text-muted-foreground text-center py-2">No hay botones globales.</p>
+              )}
             </div>
 
             <div className="flex justify-end gap-2 pt-4 border-t">

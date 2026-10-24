@@ -20,14 +20,24 @@ export const popupButtonSchema = z.object({
 })
 export type PopupButton = z.infer<typeof popupButtonSchema>
 
+export const popupSlideSchema = z.object({
+  id: z.string().min(1),
+  image: mediaRefSchema,
+  buttons: z.array(popupButtonSchema).max(5).default([]),
+})
+export type PopupSlide = z.infer<typeof popupSlideSchema>
+
 export const popupInputSchema = z.object({
   name: text(50).min(1, 'El nombre interno es requerido'),
   targetPath: text(100).min(1, 'La ruta es requerida').default('/'),
   autoCloseSeconds: z.number().int().min(0).max(60).default(0),
-  image: mediaRefSchema,
-  buttons: z.array(popupButtonSchema).max(5).default([]),
+  // NUEVO: Arreglo de diapositivas (soporta 1 o varias)
+  slides: z.array(popupSlideSchema).default([]),
+  // CAMPOS LEGACY (Mantenidos para retrocompatibilidad con popups antiguos)
+  image: mediaRefSchema.optional(),
+  buttons: z.array(popupButtonSchema).max(5).default([]).optional(),
   active: z.boolean().default(true),
-  floatingButtonStyle: z.enum(BUTTON_STYLES).default('dark'), // Estilo de la pestañita flotante
+  floatingButtonStyle: z.enum(BUTTON_STYLES).default('dark'),
 })
 
 export type PopupInput = z.infer<typeof popupInputSchema>
