@@ -65,7 +65,7 @@ export function UploadButton({
           height,
           hasAlpha: file.type === 'image/png' || file.type === 'image/webp',
           folder: folder,
-        }), 'Imagen subida correctamente')
+        }) as any, 'Imagen subida correctamente') as any
 
         if (item) onUploaded(item)
       } catch (error: any) {

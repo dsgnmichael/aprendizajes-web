@@ -1,3 +1,7 @@
+import { collections, ObjectId } from '@repo/database'
+import { requirePermission, toActor } from '@/lib/auth'
+import { recordAudit } from '@repo/data-access'
+
 'use server'
 
 import { revalidatePath } from 'next/cache'
@@ -128,9 +132,6 @@ export async function qrLogoDataUrlAction(url: string) {
   })
 }
 
-
-
-
 export async function saveMediaMetadataAction(data: {
   url: string;
   filename: string;
@@ -172,6 +173,7 @@ export async function saveMediaMetadataAction(data: {
 
   return {
     ...doc,
-    id: _id.toHexString()
+    id: _id.toHexString(),
+    ok: true
   }
 }
