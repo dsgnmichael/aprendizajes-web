@@ -10,7 +10,6 @@ import { upload } from '@vercel/blob/client'
 import { toast } from '@repo/ui/components/sonner'
 import { createPopupAction, updatePopupAction } from '@/app/(dashboard)/popups/actions'
 import { saveMediaMetadataAction } from '@/actions/media'
-import { ImageField } from '@/components/editor/image-field'
 import { toMediaRef } from '@/components/media/media-picker'
 import { Input } from '@repo/ui/components/input'
 import { Label } from '@repo/ui/components/label'
@@ -78,17 +77,6 @@ export function PopupForm({
   const currentSlide = slides[activeSlideIndex]
   const globalButtonsWatch = watch('buttons') || []
 
-  const addSlide = () => {
-    const newSlide = {
-      id: Date.now().toString(),
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      image: undefined as any,
-      buttons: []
-    }
-    setValue('slides', [...slides, newSlide])
-    setActiveSlideIndex(slides.length)
-  }
-
   const removeSlide = (index: number) => {
     const newSlides = [...slides]
     newSlides.splice(index, 1)
@@ -140,18 +128,22 @@ export function PopupForm({
 
   const handleMultiUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
-    e.target.value = ''
     if (!files || files.length === 0) return
+    
+    // Convertir a array ANTES de limpiar el input para evitar que se pierdan los archivos
+    const filesArray = Array.from(files)
+    e.target.value = ''
 
     startTransition(async () => {
       const newSlides: PopupSlide[] = [...slides]
       let successCount = 0
+      const toastId = toast.loading(`Subiendo ${filesArray.length} imágenes...`)
 
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i]
+      for (let i = 0; i < filesArray.length; i++) {
+        const file = filesArray[i]
         if (!file) continue
         if (file.size > MEDIA_LIMITS.maxBytes) {
-          toast.error(`El archivo ${file.name} supera el límite permitido`)
+          toast.error(`El archivo ${file.name} supera el límite permitido (máx ${MEDIA_LIMITS.maxBytes / 1024 / 1024}MB)`)
           continue
         }
 
@@ -181,8 +173,11 @@ export function PopupForm({
               buttons: []
             })
             successCount++
+          } else {
+            toast.error(`Error al guardar metadatos de ${file.name}`)
           }
         } catch (err: unknown) {
+          // Aquí capturamos el error de Vercel Blob (ej: falta de token en local)
           toast.error(`Error al subir ${file.name}: ${(err as Error).message}`)
         }
       }
@@ -190,7 +185,9 @@ export function PopupForm({
       if (successCount > 0) {
         setValue('slides', newSlides)
         setActiveSlideIndex(slides.length) // Ir a la primera nueva
-        toast.success(`${successCount} imágenes agregadas al carrusel`)
+        toast.success(`${successCount} imágenes agregadas al carrusel`, { id: toastId })
+      } else {
+        toast.error('No se pudo subir ninguna imagen. Revisa los errores.', { id: toastId })
       }
     })
   }
@@ -331,9 +328,6 @@ export function PopupForm({
                         {uploading ? <Loader2 className="size-4 animate-spin mr-1" /> : <Upload className="size-4 mr-1" />}
                         Subir varias
                       </Button>
-                      <Button type="button" variant="outline" size="sm" onClick={addSlide}>
-                        <Plus className="size-4 mr-1" /> Agregar 1
-                      </Button>
                     </div>
                   </div>
                   <div className="flex flex-col gap-2">
@@ -372,11 +366,6 @@ export function PopupForm({
                   </div>
                 </div>
 
-                {slides.length > 0 && (
-                  <div className="border p-4 rounded-md bg-muted/10 mt-4">
-                    <ImageField name={`slides.${activeSlideIndex}.image`} label={`Imagen de la Diapositiva ${activeSlideIndex + 1}`} folder="site" aspect="aspect-video" />
-                  </div>
-                )}
               </div>
 
               {/* Columna Derecha (Previsualización) */}
