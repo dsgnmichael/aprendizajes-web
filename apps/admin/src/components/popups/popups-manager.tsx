@@ -45,7 +45,7 @@ export function PopupsManager({ initialPopups = [], professionals = [] }: { init
           {popups.map((popup) => (
             <div key={popup.id} className="rounded-lg border p-4 space-y-3 shadow-sm">
               <div className="aspect-video w-full rounded-md bg-muted overflow-hidden relative">
-                {popup.image?.url ? (
+                {popup.image?.url && !popup.image.url.includes('localhost') ? (
                   <img src={popup.image.url} alt={popup.name} className="w-full h-full object-cover" />
                 ) : (
                   <div className="absolute inset-0 flex items-center justify-center text-muted-foreground">

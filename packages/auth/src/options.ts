@@ -27,7 +27,7 @@ export function authOptions(): NextAuthOptions {
   const e = env()
   const secure = e.ADMIN_BASE_URL.startsWith('https://')
   return {
-    secret: e.AUTH_SECRET,
+    secret: process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET || e.AUTH_SECRET,
     session: { strategy: 'jwt', maxAge: SESSION_MAX_AGE },
     pages: { signIn: '/login', error: '/login' },
     useSecureCookies: secure,
