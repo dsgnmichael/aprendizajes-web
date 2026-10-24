@@ -127,3 +127,53 @@ export async function qrLogoDataUrlAction(url: string) {
     return `data:${type.split(';')[0]};base64,${buffer.toString('base64')}`
   })
 }
+
+
+import { collections, ObjectId } from '@repo/database'
+import { requirePermission, toActor } from '@/lib/auth'
+import { recordAudit } from '@repo/data-access'
+
+export async function saveMediaMetadataAction(data: {
+  url: string;
+  filename: string;
+  mimeType: string;
+  size: number;
+  width: number;
+  height: number;
+  hasAlpha: boolean;
+  folder: string;
+  alt?: string;
+}) {
+  const user = await requirePermission('media:write')
+  const actor = toActor(user)
+  const c = await collections()
+
+  const now = new Date()
+  const _id = new ObjectId()
+  const doc = {
+    _id,
+    provider: 'vercel-blob',
+    key: data.filename,
+    url: data.url,
+    filename: data.filename,
+    mimeType: data.mimeType,
+    size: data.size,
+    width: data.width,
+    height: data.height,
+    hasAlpha: data.hasAlpha,
+    alt: data.alt || '',
+    focalX: 50,
+    focalY: 50,
+    folder: data.folder,
+    createdAt: now,
+    uploadedBy: actor.email,
+  }
+
+  await c.media.insertOne(doc as any)
+  await recordAudit(actor, 'media.uploaded', 'media', _id.toHexString(), { filename: data.filename })
+
+  return {
+    ...doc,
+    id: _id.toHexString()
+  }
+}
