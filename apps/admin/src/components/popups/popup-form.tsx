@@ -1,13 +1,17 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm, useFieldArray, FormProvider } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { type PopupDocument, popupInputSchema, type PopupInput } from '@repo/domain'
-import { Plus, Trash2, X, MousePointerClick, Image as ImageIcon } from 'lucide-react'
+import { type PopupDocument, popupInputSchema, type PopupInput, type PopupSlide, MEDIA_LIMITS } from '@repo/domain'
+import { Plus, Trash2, X, MousePointerClick, Image as ImageIcon, Loader2, Upload, GripVertical } from 'lucide-react'
+import { upload } from '@vercel/blob/client'
+import { toast } from '@repo/ui/components/sonner'
 import { createPopupAction, updatePopupAction } from '@/app/(dashboard)/popups/actions'
+import { saveMediaMetadataAction } from '@/actions/media'
 import { ImageField } from '@/components/editor/image-field'
+import { toMediaRef } from '@/components/media/media-picker'
 import { Input } from '@repo/ui/components/input'
 import { Label } from '@repo/ui/components/label'
 import { Button } from '@repo/ui/components/button'
@@ -27,8 +31,12 @@ export function PopupForm({
   const [error, setError] = useState('')
   const [activeSlideIndex, setActiveSlideIndex] = useState(0)
   const [activeButtonIndex, setActiveButtonIndex] = useState<number | null>(null)
+  
+  // Estados para Drag & Drop y Multi-upload
+  const [draggedIdx, setDraggedIdx] = useState<number | null>(null)
+  const [uploading, startTransition] = useTransition()
+  const multiInputRef = useRef<HTMLInputElement>(null)
 
-  // Mover los botones de las diapositivas antiguas a los botones globales
   const initialSlides = initialData?.slides && initialData.slides.length > 0 
     ? initialData.slides 
     : initialData?.image ? [{ id: 'legacy', image: initialData.image, buttons: [] }] : []
@@ -90,12 +98,108 @@ export function PopupForm({
     }
   }
 
+  // --- LÓGICA DE DRAG & DROP ---
+  const handleDragStart = (e: React.DragEvent, index: number) => {
+    setDraggedIdx(index)
+    e.dataTransfer.effectAllowed = 'move'
+  }
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault()
+    e.dataTransfer.dropEffect = 'move'
+  }
+
+  const handleDrop = (e: React.DragEvent, index: number) => {
+    e.preventDefault()
+    if (draggedIdx === null || draggedIdx === index) return
+    
+    const newSlides = [...slides]
+    const [movedItem] = newSlides.splice(draggedIdx, 1)
+    if (!movedItem) return
+    newSlides.splice(index, 0, movedItem)
+    
+    setValue('slides', newSlides)
+    setActiveSlideIndex(index)
+    setDraggedIdx(null)
+  }
+
+  // --- LÓGICA DE MULTI-UPLOAD ---
+  const getDimensions = (file: File) => new Promise<{ width: number, height: number }>((resolve, reject) => {
+    const url = URL.createObjectURL(file)
+    const img = new Image()
+    img.onload = () => {
+      URL.revokeObjectURL(url)
+      resolve({ width: img.width, height: img.height })
+    }
+    img.onerror = () => {
+      URL.revokeObjectURL(url)
+      reject(new Error('Error al leer la imagen'))
+    }
+    img.src = url
+  })
+
+  const handleMultiUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
+    e.target.value = ''
+    if (!files || files.length === 0) return
+
+    startTransition(async () => {
+      const newSlides: PopupSlide[] = [...slides]
+      let successCount = 0
+
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i]
+        if (!file) continue
+        if (file.size > MEDIA_LIMITS.maxBytes) {
+          toast.error(`El archivo ${file.name} supera el límite permitido`)
+          continue
+        }
+
+        try {
+          const { width, height } = await getDimensions(file)
+          const blob = await upload(file.name, file, {
+            access: 'public',
+            handleUploadUrl: '/api/upload',
+          })
+
+          const result = await saveMediaMetadataAction({
+            url: blob.url,
+            filename: file.name,
+            mimeType: file.type,
+            size: file.size,
+            width,
+            height,
+            hasAlpha: file.type === 'image/png' || file.type === 'image/webp',
+            folder: 'site',
+          })
+
+          if (result.ok && result.data) {
+            newSlides.push({
+              id: Date.now().toString() + i,
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              image: toMediaRef(result.data as any),
+              buttons: []
+            })
+            successCount++
+          }
+        } catch (err: unknown) {
+          toast.error(`Error al subir ${file.name}: ${(err as Error).message}`)
+        }
+      }
+
+      if (successCount > 0) {
+        setValue('slides', newSlides)
+        setActiveSlideIndex(slides.length) // Ir a la primera nueva
+        toast.success(`${successCount} imágenes agregadas al carrusel`)
+      }
+    })
+  }
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const onSubmit = async (data: any) => {
     setLoading(true)
     setError('')
 
-    // Limpiamos los botones de las diapositivas para usar solo los globales
     const payload = {
       ...data,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -204,25 +308,54 @@ export function PopupForm({
 
                 <div className="border p-4 rounded-md bg-muted/10 space-y-3">
                   <div className="flex justify-between items-center">
-                    <Label>Diapositivas</Label>
-                    <Button type="button" variant="outline" size="sm" onClick={addSlide}>
-                      <Plus className="size-4 mr-1" /> Agregar
-                    </Button>
+                    <div>
+                      <Label>Diapositivas</Label>
+                      <p className="text-[11px] text-muted-foreground">Arrastra para reordenar</p>
+                    </div>
+                    <div className="flex gap-2">
+                      <input
+                        ref={multiInputRef}
+                        type="file"
+                        multiple
+                        accept={MEDIA_LIMITS.mimeTypes.join(',')}
+                        className="hidden"
+                        onChange={handleMultiUpload}
+                      />
+                      <Button 
+                        type="button" 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => multiInputRef.current?.click()}
+                        disabled={uploading}
+                      >
+                        {uploading ? <Loader2 className="size-4 animate-spin mr-1" /> : <Upload className="size-4 mr-1" />}
+                        Subir varias
+                      </Button>
+                      <Button type="button" variant="outline" size="sm" onClick={addSlide}>
+                        <Plus className="size-4 mr-1" /> Agregar 1
+                      </Button>
+                    </div>
                   </div>
                   <div className="flex flex-col gap-2">
                     {slides.map((slide, idx) => (
                       <div 
                         key={slide.id || idx} 
+                        draggable
+                        onDragStart={(e) => handleDragStart(e, idx)}
+                        onDragOver={handleDragOver}
+                        onDrop={(e) => handleDrop(e, idx)}
                         className={cn(
-                          "flex items-center justify-between p-2 border rounded cursor-pointer",
-                          activeSlideIndex === idx ? "border-primary bg-primary/5" : "bg-background"
+                          "flex items-center justify-between p-2 border rounded cursor-pointer transition-opacity",
+                          activeSlideIndex === idx ? "border-primary bg-primary/5" : "bg-background",
+                          draggedIdx === idx ? "opacity-50" : "opacity-100"
                         )}
                         onClick={() => setActiveSlideIndex(idx)}
                       >
                         <div className="flex items-center gap-2 truncate">
+                          <GripVertical className="size-4 text-muted-foreground cursor-grab" />
                           {slide.image?.url ? (
                             /* eslint-disable-next-line @next/next/no-img-element */
-                            <img src={slide.image.url} alt="thumb" className="size-8 rounded object-cover" />
+                            <img src={slide.image.url} alt="thumb" className="size-8 rounded object-cover pointer-events-none" />
                           ) : (
                             <div className="size-8 rounded bg-muted flex items-center justify-center"><ImageIcon className="size-4 text-muted-foreground" /></div>
                           )}
@@ -234,7 +367,7 @@ export function PopupForm({
                       </div>
                     ))}
                     {slides.length === 0 && (
-                      <p className="text-xs text-muted-foreground text-center py-2">No hay imágenes. Agrega una.</p>
+                      <p className="text-xs text-muted-foreground text-center py-2">No hay imágenes. Agrega o sube varias.</p>
                     )}
                   </div>
                 </div>
