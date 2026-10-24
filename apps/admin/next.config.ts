@@ -19,7 +19,7 @@ const csp = [
   "style-src 'self' 'unsafe-inline'",
   `img-src 'self' data: blob: ${publicUrl.origin} https://*.public.blob.vercel-storage.com https://lh3.googleusercontent.com https://*.googleusercontent.com`,
   "font-src 'self' data:",
-  "connect-src 'self'",
+  "connect-src 'self' https://vercel.com https://*.public.blob.vercel-storage.com",
   `frame-src ${publicUrl.origin}`,
   "frame-ancestors 'none'",
   "base-uri 'self'",
