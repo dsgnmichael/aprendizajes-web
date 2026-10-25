@@ -10,6 +10,7 @@ export const ANALYTICS_EVENTS = [
   'popup_closed',
   'popup_restored',
   'popup_cta_click',
+  'parent_club_registration',
 ] as const
 export type AnalyticsEvent = (typeof ANALYTICS_EVENTS)[number]
 export type AnalyticsProps = Record<string, string | number | boolean | undefined>

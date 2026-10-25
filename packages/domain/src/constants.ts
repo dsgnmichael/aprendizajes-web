@@ -145,6 +145,7 @@ export const COLLECTIONS = {
   auditLogs: 'auditLogs',
   popups: 'popups',
   rateLimits: 'rateLimits',
+  parentClubRegistrations: 'parentClubRegistrations',
 } as const
 
 /** Cache tags shared by the admin (invalidator) and the public app (consumer). */

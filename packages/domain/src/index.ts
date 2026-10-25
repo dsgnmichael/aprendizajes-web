@@ -16,3 +16,5 @@ export * from './logic/testimonials'
 export * from './logic/richtext'
 export * from './logic/analytics'
 export * from './logic/seo'
+
+export * from './schemas/parent-club'

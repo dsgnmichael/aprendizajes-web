@@ -1,4 +1,5 @@
-import { countAppointmentsByStatus } from '@repo/data-access'
+import { connection } from 'next/server'
+import { countAppointmentsByStatus, countUnreadParentClubRegistrations } from '@repo/data-access'
 import { can, ROLE_LABELS } from '@repo/domain'
 import { requireUser } from '@/lib/auth'
 import { initials } from '@/lib/format'
@@ -8,10 +9,19 @@ import { NavLinks } from '@/components/shell/sidebar'
 import { UserMenu } from '@/components/shell/user-menu'
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
+  // Forzar ejecución dinámica para que los badges (counts) se recalculen en cada visita
+  await connection()
+
   const user = await requireUser()
   const items = NAV_ITEMS.filter((item) => can(user.role, item.permission))
-  const counts = can(user.role, 'appointments:read') ? await countAppointmentsByStatus() : null
-  const badges = counts?.new ? { '/appointments': counts.new } : undefined
+  const [counts, unreadForms] = await Promise.all([
+    can(user.role, 'appointments:read') ? countAppointmentsByStatus() : null,
+    can(user.role, 'settings:write') ? countUnreadParentClubRegistrations() : 0,
+  ])
+
+  const badges: Partial<Record<string, number>> = {}
+  if (counts?.new) badges['/appointments'] = counts.new
+  if (unreadForms > 0) badges['/formularios'] = unreadForms
 
   const userMenu = (
     <UserMenu

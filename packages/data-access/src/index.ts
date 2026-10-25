@@ -14,3 +14,4 @@ export * from './repositories/dashboard'
 export * from './repositories/home-page'
 
 export * from './repositories/popups'
+export * from './repositories/parent-club'

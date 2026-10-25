@@ -17,6 +17,7 @@ import type {
   TestimonialModel,
   UserModel,
   PopupModel,
+  ParentClubRegistrationModel,
 } from './models'
 
 export interface Collections {
@@ -35,6 +36,7 @@ export interface Collections {
   auditLogs: Collection<AuditLogModel>
   rateLimits: Collection<RateLimitModel>
   popups: Collection<PopupModel>
+  parentClubRegistrations: Collection<ParentClubRegistrationModel>
 }
 
 export function collectionsFor(db: Db): Collections {
@@ -54,6 +56,7 @@ export function collectionsFor(db: Db): Collections {
     auditLogs: db.collection<AuditLogModel>(COLLECTIONS.auditLogs),
     rateLimits: db.collection<RateLimitModel>(COLLECTIONS.rateLimits),
     popups: db.collection<PopupModel>(COLLECTIONS.popups),
+    parentClubRegistrations: db.collection<ParentClubRegistrationModel>(COLLECTIONS.parentClubRegistrations),
   }
 }
 

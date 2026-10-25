@@ -15,6 +15,7 @@ export interface NavItem {
     | 'users'
     | 'audit'
     | 'popups'
+    | 'formularios'
   permission: Permission
 }
 
@@ -49,6 +50,12 @@ export const NAV_ITEMS: NavItem[] = [
     label: 'Solicitudes',
     icon: 'appointments',
     permission: 'appointments:read',
+  },
+  {
+    href: '/formularios',
+    label: 'Formularios y respuestas',
+    icon: 'formularios',
+    permission: 'settings:write',
   },
   {
     href: '/integrations',

@@ -20,7 +20,7 @@ async function exists(slug: string): Promise<boolean> {
 }
 
 /** Single-segment routes that exist in the app (never treated as profile slugs). */
-const APP_ROUTES = new Set(['equipo'])
+const APP_ROUTES = new Set(['equipo', 'invitacion-especial'])
 
 export async function proxy(request: NextRequest) {
   const segment = request.nextUrl.pathname.slice(1)

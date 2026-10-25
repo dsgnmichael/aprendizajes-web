@@ -14,6 +14,7 @@ import {
   ShieldCheck,
   UsersRound,
   Megaphone,
+  HeartHandshake,
 } from 'lucide-react'
 import { cn } from '@repo/ui/lib/utils'
 import type { NavItem } from './nav'
@@ -24,6 +25,8 @@ const ICONS = {
   professionals: UsersRound,
   testimonials: MessageSquareQuote,
   popups: Megaphone,
+  formularios: HeartHandshake,
+  parentClub: HeartHandshake,
   appointments: CalendarClock,
   integrations: PlugZap,
   media: ImageIcon,

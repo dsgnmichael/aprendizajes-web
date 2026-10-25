@@ -12,6 +12,7 @@ import type {
   SiteSettings,
   PopupDocument,
   TestimonialDocument,
+  ParentClubRegistrationDocument,
 } from '@repo/domain'
 
 /** Mongo shapes: domain documents with `_id` instead of `id`. */
@@ -144,3 +145,5 @@ export interface HomePageRevisionModel {
 }
 
 export type PopupModel = WithObjectId<PopupDocument>
+
+export type ParentClubRegistrationModel = WithObjectId<ParentClubRegistrationDocument>
