@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { CancelConfirmation } from '@/components/parent-club/CancelConfirmation'
 
 export default async function CancelarPage({ params }: { params: Promise<{ id: string }> }) {
