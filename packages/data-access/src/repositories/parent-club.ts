@@ -10,7 +10,9 @@ import {
 export async function createParentClubRegistration(
   input: ParentClubRegistrationInput,
 ): Promise<ParentClubRegistrationDocument> {
-  const data = parentClubRegistrationSchema.parse({ ...input, formType: input.formType || 'invitacion-especial' })
+  const parsed = parentClubRegistrationSchema.parse({ ...input, formType: input.formType || 'invitacion-especial' })
+  // Normalizar email a minúsculas para comparaciones consistentes
+  const data = { ...parsed, email: parsed.email.trim().toLowerCase() }
   const c = await collections()
   const now = new Date()
   const _id = new ObjectId()
@@ -20,11 +22,13 @@ export async function createParentClubRegistration(
     status: 'nuevo' as const,
     tags: [] as ParentClubTag[],
     readAt: null,
+    calendarClickedAt: null,
+    cancelledAt: null,
     createdAt: now,
     updatedAt: now,
   }
   await c.parentClubRegistrations.insertOne(doc)
-  return { ...data, id: _id.toHexString(), status: 'nuevo', tags: [], readAt: null, createdAt: now, updatedAt: now }
+  return { ...data, id: _id.toHexString(), status: 'nuevo', tags: [], readAt: null, calendarClickedAt: null, cancelledAt: null, createdAt: now, updatedAt: now }
 }
 
 export async function listParentClubRegistrations(): Promise<ParentClubRegistrationDocument[]> {
@@ -42,6 +46,8 @@ export async function listParentClubRegistrations(): Promise<ParentClubRegistrat
     status: r.status,
     tags: (r.tags || []) as ParentClubTag[],
     readAt: r.readAt || null,
+    calendarClickedAt: r.calendarClickedAt || null,
+    cancelledAt: r.cancelledAt || null,
     createdAt: r.createdAt,
     updatedAt: r.updatedAt,
   }))
@@ -78,6 +84,8 @@ export async function listParentClubRegistrationsByType(formType: string): Promi
     status: r.status,
     tags: (r.tags || []) as ParentClubTag[],
     readAt: r.readAt || null,
+    calendarClickedAt: r.calendarClickedAt || null,
+    cancelledAt: r.cancelledAt || null,
     createdAt: r.createdAt,
     updatedAt: r.updatedAt,
   }))
@@ -133,4 +141,89 @@ export async function markAllParentClubRegistrationsAsRead(): Promise<number> {
     { $set: { readAt: new Date() } }
   )
   return result.modifiedCount
+}
+
+
+export type DuplicateCheckResult =
+  | { exists: false }
+  | { exists: true; field: 'email' | 'whatsapp'; message: string }
+
+/**
+ * Verifica si ya existe un registro con el mismo email o WhatsApp.
+ * - El email se compara case-insensitive.
+ * - El WhatsApp se compara por dígitos (ignorando espacios, guiones, paréntesis).
+ */
+export async function findExistingParentClubRegistration(
+  email: string,
+  whatsapp: string,
+): Promise<DuplicateCheckResult> {
+  const c = await collections()
+  const normalizedEmail = email.trim().toLowerCase()
+
+  // 1. Buscar por email exacto (ya lo guardamos en minúsculas)
+  if (normalizedEmail) {
+    const byEmail = await c.parentClubRegistrations.findOne(
+      { email: normalizedEmail },
+      { projection: { _id: 1 } },
+    )
+    if (byEmail) {
+      return {
+        exists: true,
+        field: 'email',
+        message: 'Ya existe un registro con este correo electrónico. Si necesitás actualizar tus datos, contactanos directamente.',
+      }
+    }
+  }
+
+  // 2. Buscar por WhatsApp comparando solo dígitos
+  if (whatsapp) {
+    const whatsappDigits = whatsapp.replace(/\D/g, '')
+    if (whatsappDigits.length >= 8) {
+      const candidates = await c.parentClubRegistrations
+        .find({}, { projection: { whatsapp: 1 } })
+        .toArray()
+      const match = candidates.find(
+        (r) => r.whatsapp.replace(/\D/g, '') === whatsappDigits,
+      )
+      if (match) {
+        return {
+          exists: true,
+          field: 'whatsapp',
+          message: 'Ya existe un registro con este número de WhatsApp. Si necesitás actualizar tus datos, contactanos directamente.',
+        }
+      }
+    }
+  }
+
+  return { exists: false }
+}
+
+
+export async function cancelParentClubRegistration(id: string): Promise<boolean> {
+  const { ObjectId } = await import('mongodb')
+  const c = await collections()
+  const _id = new ObjectId(id)
+  
+  const doc = await c.parentClubRegistrations.findOne({ _id })
+  if (!doc) return false
+  
+  const currentTags = (doc.tags || []) as ParentClubTag[]
+  const newTags: ParentClubTag[] = currentTags.includes('seguimiento') ? currentTags : [...currentTags, 'seguimiento']
+  
+  const result = await c.parentClubRegistrations.updateOne(
+    { _id },
+    { $set: { status: 'cancelled', cancelledAt: new Date(), updatedAt: new Date(), tags: newTags } },
+  )
+  return result.modifiedCount === 1
+}
+
+export async function markCalendarClicked(id: string): Promise<boolean> {
+  const { ObjectId } = await import('mongodb')
+  const c = await collections()
+  const _id = new ObjectId(id)
+  const result = await c.parentClubRegistrations.updateOne(
+    { _id },
+    { $set: { calendarClickedAt: new Date() } },
+  )
+  return result.modifiedCount === 1
 }

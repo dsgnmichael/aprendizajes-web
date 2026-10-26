@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { listParentClubRegistrationsByType } from '@repo/data-access'
 import { ArrowLeft } from 'lucide-react'
+import { connection } from 'next/server'
 import { ParentClubTable } from '@/components/parent-club/parent-club-table'
 
 export const metadata: Metadata = {
@@ -9,6 +10,7 @@ export const metadata: Metadata = {
 }
 
 export default async function InvitacionEspecialPage() {
+  await connection()
   const registrations = await listParentClubRegistrationsByType('invitacion-especial')
 
   return (

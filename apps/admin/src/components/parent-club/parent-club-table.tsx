@@ -7,6 +7,17 @@ import { SUPPORT_AREA_LABELS, PARENT_CLUB_TAGS, PARENT_CLUB_TAG_LABELS } from '@
 import { ChevronDown, ChevronRight, Mail, Phone, Calendar, User, Trash2, Loader2, X, CheckSquare, Star, Flame, CheckCircle2, CalendarCheck, Gem, Pin, PauseCircle, XCircle, Search, Filter } from 'lucide-react'
 import { toast } from '@repo/ui/components/sonner'
 import { cn } from '@repo/ui/lib/utils'
+
+function calculateAge(birthDate: string): number {
+  const today = new Date()
+  const birth = new Date(birthDate)
+  let age = today.getFullYear() - birth.getFullYear()
+  const m = today.getMonth() - birth.getMonth()
+  if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
+    age--
+  }
+  return age
+}
 import {
   deleteRegistrationAction,
   deleteManyRegistrationsAction,
@@ -412,7 +423,9 @@ export function ParentClubTable({ registrations }: { registrations: ParentClubRe
                       "inline-flex rounded-full px-2.5 py-1 text-xs font-bold",
                       r.status === 'nuevo' ? 'bg-blue-100 text-blue-700' :
                       r.status === 'contactado' ? 'bg-amber-100 text-amber-700' :
-                      'bg-green-100 text-green-700'
+                      r.status === 'integrado' ? 'bg-green-100 text-green-700' :
+                      r.status === 'cancelled' ? 'bg-red-100 text-red-700' :
+                      'bg-gray-100 text-gray-700'
                     )}>
                       {r.status.toUpperCase()}
                     </span>
@@ -485,7 +498,7 @@ export function ParentClubTable({ registrations }: { registrations: ParentClubRe
                         <Calendar className="mt-0.5 size-4 text-muted-foreground shrink-0" />
                         <div>
                           <p className="text-xs font-bold text-muted-foreground uppercase">Fecha de nacimiento</p>
-                          <p className="text-sm font-medium">{r.birthDate}</p>
+                          <p className="text-sm font-medium">{r.birthDate} <span className="text-muted-foreground font-normal">({calculateAge(r.birthDate)} años)</span></p>
                         </div>
                       </div>
                       <div className="flex items-start gap-3 sm:col-span-2">

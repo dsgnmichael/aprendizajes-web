@@ -12,6 +12,8 @@ import {
   type ParentClubRegistrationInput,
   parentClubRegistrationSchema
 } from '@repo/domain'
+import { QRCodeSVG } from 'qrcode.react'
+import { buildGoogleCalendarUrl, CLUB_EVENT } from '@/lib/google-calendar'
 import { track } from '@/lib/analytics'
 import { cn } from '@/lib/cn'
 import { useRouter } from 'next/navigation'
@@ -50,7 +52,10 @@ export function ParentClubForm() {
   const router = useRouter()
   const [step, setStep] = useState(1)
   const [success, setSuccess] = useState(false)
+  const [createdId, setCreatedId] = useState<string | null>(null)
+  const [createdEmail, setCreatedEmail] = useState<string | null>(null)
   const [submitError, setSubmitError] = useState('')
+  const [validatingStep, setValidatingStep] = useState(false)
   const [maxDate, setMaxDate] = useState<string | undefined>()
   
   const [selectedCountry, setSelectedCountry] = useState(COUNTRIES[0]!)
@@ -98,11 +103,41 @@ export function ParentClubForm() {
   )
 
   const handleNext = async () => {
+    setSubmitError('')
     const fieldsToValidate = STEPS[step - 1]?.fields || []
     const isValid = await trigger(fieldsToValidate as unknown as (keyof ParentClubRegistrationInput)[])
-    if (isValid) {
-      setStep((s) => Math.min(s + 1, 4))
+    if (!isValid) return
+
+    // Validar duplicados en paso 2 (WhatsApp) y paso 3 (Email)
+    if (step === 2) {
+      setValidatingStep(true)
+      try {
+        const res = await fetch(`/api/parent-club/check?whatsapp=${encodeURIComponent(watch('whatsapp'))}`)
+        const data = await res.json()
+        if (data.exists) {
+          setSubmitError(data.message)
+          setValidatingStep(false)
+          return
+        }
+      } catch { /* ignore */ }
+      setValidatingStep(false)
     }
+
+    if (step === 3) {
+      setValidatingStep(true)
+      try {
+        const res = await fetch(`/api/parent-club/check?email=${encodeURIComponent(watch('email'))}`)
+        const data = await res.json()
+        if (data.exists) {
+          setSubmitError(data.message)
+          setValidatingStep(false)
+          return
+        }
+      } catch { /* ignore */ }
+      setValidatingStep(false)
+    }
+
+    setStep((s) => Math.min(s + 1, 4))
   }
 
   const handlePrev = () => setStep((s) => Math.max(s - 1, 1))
@@ -127,7 +162,10 @@ export function ParentClubForm() {
         const errorData = await res.json()
         throw new Error(errorData.error || 'Error al enviar')
       }
+      const responseData = await res.json()
       track('parent_club_registration', { areas: data.supportAreas.length })
+      setCreatedId(responseData.registration?.id || null)
+      setCreatedEmail(responseData.registration?.email || data.email)
       setSuccess(true)
     } catch (e) {
       setSubmitError((e as Error).message)
@@ -135,29 +173,100 @@ export function ParentClubForm() {
   }
 
   const handleGoHome = () => {
-    // Limpiar la memoria del popup para que vuelva a aparecer
     Object.keys(sessionStorage).forEach((key) => {
-      if (key.startsWith('dismissed_popup_')) {
-        sessionStorage.removeItem(key)
-      }
+      if (key.startsWith('dismissed_popup_')) sessionStorage.removeItem(key)
     })
     router.push('/')
   }
 
-  if (success) {
+  const handleCancel = async () => {
+    if (!createdId) return
+    try {
+      const res = await fetch('/api/parent-club/cancel', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: createdId }),
+      })
+      if (res.ok) {
+        router.push('/')
+      }
+    } catch { /* ignore */ }
+  }
+
+  const handleCalendarClick = () => {
+    if (createdId) {
+      fetch('/api/parent-club/calendar-click', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: createdId }),
+      }).catch(() => {})
+    }
+  }
+
+  if (success && createdId && createdEmail) {
+    const verifyUrl = typeof window !== 'undefined'
+      ? `${window.location.origin}/verificar/${createdId}`
+      : `/verificar/${createdId}`
+    const calendarUrl = buildGoogleCalendarUrl({
+      title: CLUB_EVENT.title,
+      description: CLUB_EVENT.description,
+      location: CLUB_EVENT.location,
+      startUTC: CLUB_EVENT.startUTC,
+      endUTC: CLUB_EVENT.endUTC,
+    })
+
     return (
-      <div className="text-center bg-white rounded-[2rem] p-12 shadow-sm border border-gray-100">
-        <div className="mx-auto mb-6 grid size-16 place-items-center rounded-full bg-[#ece7f3] text-brand">
-          <PartyPopper className="size-8" />
+      <div className="bg-white rounded-[2rem] p-6 sm:p-8 shadow-lifted">
+        <div className="text-center">
+          <div className="mx-auto mb-4 grid size-16 place-items-center rounded-full bg-[#ece7f3] text-brand">
+            <PartyPopper className="size-8" />
+          </div>
+          <h2 className="text-2xl font-black text-ink">¡Tu lugar está reservado!</h2>
+          <p className="mt-2 text-sm text-ink-muted">Nos vemos el sábado 31 de octubre a las 10:00 AM</p>
         </div>
-        <h2 className="text-2xl font-black text-ink">¡Tu lugar está reservado!</h2>
-        <p className="mt-4 text-ink-muted">
-          Gracias por confirmar tu asistencia. Pronto recibirás los detalles de la sesión gratuita del Club de Padres.
-        </p>
+
+        <div className="mt-6 rounded-2xl border-2 border-dashed border-brand/30 bg-[#f4f1fa] p-6 text-center">
+          <p className="text-xs font-bold text-brand uppercase tracking-wider">Tu credencial</p>
+          <p className="mt-2 text-base font-bold text-ink break-all">{createdEmail}</p>
+          <div className="mt-4 flex justify-center">
+            <div className="rounded-xl bg-white p-3 shadow-sm">
+              <QRCodeSVG value={verifyUrl} size={140} level="M" />
+            </div>
+          </div>
+          <p className="mt-3 text-xs text-muted-foreground">Mostrala en la entrada (o guardala en tu celular)</p>
+        </div>
+
+        <div className="mt-4 space-y-1.5 rounded-xl bg-muted/30 p-4">
+          <p className="text-sm font-bold text-ink">📅 Sábado 31 de octubre de 2026</p>
+          <p className="text-sm text-ink-muted">🕙 10:00 AM - 12:00 PM</p>
+          <p className="text-sm text-ink-muted">📍 Av. El Paseo, Los Rosales, Caracas</p>
+          <a href={CLUB_EVENT.mapsUrl} target="_blank" rel="noopener noreferrer" className="inline-block text-sm font-medium text-brand underline">
+            📌 Ver en Google Maps
+          </a>
+        </div>
+
+        <a
+          href={calendarUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={handleCalendarClick}
+          className="mt-4 flex w-full items-center justify-center gap-2 rounded-full bg-brand px-6 py-3.5 text-sm font-black text-white shadow-md transition hover:bg-brand-deep"
+        >
+          📅 Añadir a mi calendario
+        </a>
+
+        <button
+          type="button"
+          onClick={handleCancel}
+          className="mt-3 flex w-full items-center justify-center gap-2 rounded-full border-2 border-red-200 px-6 py-3 text-sm font-bold text-red-600 transition hover:bg-red-50"
+        >
+          No podré asistir
+        </button>
+
         <button
           type="button"
           onClick={handleGoHome}
-          className="mt-8 inline-flex items-center gap-2 rounded-full bg-brand px-8 py-3.5 text-sm font-black text-white shadow-md transition-all hover:bg-brand-deep hover:scale-[1.02]"
+          className="mt-3 flex w-full items-center justify-center text-xs font-medium text-muted-foreground underline-offset-4 hover:underline"
         >
           Volver al inicio
         </button>
@@ -337,6 +446,7 @@ export function ParentClubForm() {
 
                   <input
                     type="tel"
+                    inputMode="tel"
                     value={phoneLocal}
                     onChange={(e) => setPhoneLocal(e.target.value.replace(/[^\d\s]/g, ''))}
                     className={cn(
@@ -366,6 +476,9 @@ export function ParentClubForm() {
                 </label>
                 <input
                   type="email"
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  spellCheck={false}
                   {...register('email')}
                   className={cn(
                     "w-full rounded-full border-2 p-3.5 px-6 text-base transition-colors focus:outline-none",

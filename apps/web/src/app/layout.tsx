@@ -51,7 +51,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   const [site, year] = await Promise.all([getSite(), getCurrentYear()])
   const ga = site.analytics.ga4MeasurementId || process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID
   return (
-    <html lang="es" className={`${lato.variable} ${loverine.variable}`}>
+    <html lang="es" dir="ltr" className={`${lato.variable} ${loverine.variable}`}>
       <body
         style={themeToCssVars(site.theme) as CSSProperties}
         data-motion={site.theme.motion === 'off' ? 'off' : undefined}

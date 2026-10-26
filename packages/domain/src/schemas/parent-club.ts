@@ -105,9 +105,11 @@ export type ParentClubRegistrationInput = z.infer<typeof parentClubRegistrationS
 
 export interface ParentClubRegistrationDocument extends ParentClubRegistrationInput {
   id: string
-  status: 'nuevo' | 'contactado' | 'integrado'
+  status: 'nuevo' | 'contactado' | 'integrado' | 'cancelled'
   tags: ParentClubTag[]
   readAt: Date | null
+  calendarClickedAt: Date | null
+  cancelledAt: Date | null
   createdAt: Date
   updatedAt: Date
 }
