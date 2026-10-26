@@ -1,4 +1,4 @@
-export const dynamic = 'force-dynamic'
+export const instant = false
 
 import { CancelConfirmation } from '@/components/parent-club/CancelConfirmation'
 
