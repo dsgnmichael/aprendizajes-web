@@ -221,8 +221,8 @@ export function ParentClubForm() {
           <div className="mx-auto mb-4 grid size-16 place-items-center rounded-full bg-[#ece7f3] text-brand">
             <PartyPopper className="size-8" />
           </div>
-          <h2 className="text-2xl font-black text-ink">¡Tu lugar está reservado!</h2>
-          <p className="mt-2 text-sm text-ink-muted">Nos vemos el sábado 31 de octubre a las 10:00 AM</p>
+          <h2 className="text-2xl font-black text-ink">¡Postulación enviada!</h2>
+          <p className="mt-2 text-sm text-ink-muted">Hemos recibido tus datos. Revisa tu correo electrónico.</p>
         </div>
 
         <div className="mt-6 rounded-2xl border-2 border-dashed border-brand/30 bg-[#f4f1fa] p-6 text-center">
@@ -233,7 +233,7 @@ export function ParentClubForm() {
               <QRCodeSVG value={verifyUrl} size={140} level="M" />
             </div>
           </div>
-          <p className="mt-3 text-xs text-muted-foreground">Mostrala en la entrada (o guardala en tu celular)</p>
+          <p className="mt-3 text-xs text-muted-foreground">Guarda tu comprobante en tu celular</p>
         </div>
 
         <div className="mt-4 space-y-1.5 rounded-xl bg-muted/30 p-4">
@@ -252,7 +252,7 @@ export function ParentClubForm() {
           onClick={handleCalendarClick}
           className="mt-4 flex w-full items-center justify-center gap-2 rounded-full bg-brand px-6 py-3.5 text-sm font-black text-white shadow-md transition hover:bg-brand-deep"
         >
-          📅 Añadir a mi calendario
+          📅 Volver al inicio
         </a>
 
         <button
@@ -260,7 +260,7 @@ export function ParentClubForm() {
           onClick={handleCancel}
           className="mt-3 flex w-full items-center justify-center gap-2 rounded-full border-2 border-red-200 px-6 py-3 text-sm font-bold text-red-600 transition hover:bg-red-50"
         >
-          No podré asistir
+          
         </button>
 
         <button

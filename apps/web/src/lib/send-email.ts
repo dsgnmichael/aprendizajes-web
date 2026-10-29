@@ -56,7 +56,7 @@ export async function sendParentClubEmail({
     )
 
     // 4. Construir el mensaje MIME
-    const subject = '¡Bienvenido/a al Club de Padres! Tu registro está confirmado'
+    const subject = 'Hemos recibido tu postulación - Club de Padres Aprendizajess'
     const utf8Subject = `=?utf-8?B?${Buffer.from(subject).toString('base64')}?=`
     const messageParts = [
       `From: Aprendizajess <${process.env.GMAIL_FROM_EMAIL}>`,
