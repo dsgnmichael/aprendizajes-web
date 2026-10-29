@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const parsed = parentClubRegistrationSchema.safeParse(body)
     if (!parsed.success) {
-      return NextResponse.json({ error: 'Datos invalidos', details: parsed.error.flatten() }, { status: 400, headers: NO_STORE })
+      return NextResponse.json({ error: 'Datos inválidos', details: parsed.error.flatten() }, { status: 400, headers: NO_STORE })
     }
 
     // Verificar duplicados por email o WhatsApp
@@ -24,13 +24,16 @@ export async function POST(request: NextRequest) {
 
     const registration = await createParentClubRegistration(parsed.data)
 
-    // 🔥 ENVIAR EL CORREO EA MANERA INDISPARABLE (Asincrono para no bloquear la respuesta)
-    // El usuario ve la pantalla de "registro exitoso" de inmediato, y el correo se procesa por detras.
-    sendParentClubEmail({
-      registrationId: registration.id,
-      fullName: registration.fullName,
-      email: registration.email,
-    }).catch(err => console.error('Error enviando correo en segundo plano:', err))
+    // 🔥 EL ARREGLO CLAVE: Agregamos 'await' para que Vercel espere a que el correo se envíe.
+    try {
+      await sendParentClubEmail({
+        registrationId: registration.id,
+        fullName: registration.fullName,
+        email: registration.email,
+      })
+    } catch (emailError) {
+      console.error('❌ Error al enviar el correo (no bloquea el registro):', emailError)
+    }
 
     return NextResponse.json({ ok: true, registration }, { headers: NO_STORE })
   } catch {
