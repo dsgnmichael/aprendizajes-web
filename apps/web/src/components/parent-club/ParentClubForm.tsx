@@ -70,7 +70,147 @@ export function ParentClubForm() {
     setValue,
     trigger,
     formState: { errors, isSubmitting },
-  } = useForm<p className="mt-4 text-sm text-gray-600">Nuestro equipo está revisando las solicitudes para la sesión gratuita. Nos pondremos en contacto contigo muy pronto para confirmar si has sido seleccionado.</p>
+  } = useForm<ParentClubRegistrationInput>({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    resolver: zodResolver(parentClubRegistrationSchema) as any,
+    defaultValues: {
+      fullName: '',
+      birthDate: '',
+      whatsapp: '',
+      email: '',
+      supportAreas: [],
+      otherSupport: '',
+    },
+    mode: 'onTouched',
+  })
+
+  // eslint-disable-next-line react-hooks/incompatible-library
+  const selectedAreas = (watch('supportAreas') || []) as SupportArea[]
+  const otherSupportValue = watch('otherSupport') || ''
+
+  useEffect(() => {
+    setMaxDate(new Date().toISOString().slice(0, 10))
+  }, [])
+
+  useEffect(() => {
+    const digits = phoneLocal.replace(/\D/g, '')
+    setValue('whatsapp', selectedCountry.dialCode + digits)
+  }, [selectedCountry, phoneLocal, setValue])
+
+  const filteredCountries = COUNTRIES.filter((c) =>
+    c.name.toLowerCase().includes(countrySearch.toLowerCase()) ||
+    c.dialCode.includes(countrySearch)
+  )
+
+  const handleNext = async () => {
+    setSubmitError('')
+    const fieldsToValidate = STEPS[step - 1]?.fields || []
+    const isValid = await trigger(fieldsToValidate as unknown as (keyof ParentClubRegistrationInput)[])
+    if (!isValid) return
+
+    // Validar duplicados en paso 2 (WhatsApp) y paso 3 (Email)
+    if (step === 2) {
+      setValidatingStep(true)
+      try {
+        const res = await fetch(`/api/parent-club/check?whatsapp=${encodeURIComponent(watch('whatsapp'))}`)
+        const data = await res.json()
+        if (data.exists) {
+          setSubmitError(data.message)
+          setValidatingStep(false)
+          return
+        }
+      } catch { /* ignore */ }
+      setValidatingStep(false)
+    }
+
+    if (step === 3) {
+      setValidatingStep(true)
+      try {
+        const res = await fetch(`/api/parent-club/check?email=${encodeURIComponent(watch('email'))}`)
+        const data = await res.json()
+        if (data.exists) {
+          setSubmitError(data.message)
+          setValidatingStep(false)
+          return
+        }
+      } catch { /* ignore */ }
+      setValidatingStep(false)
+    }
+
+    setStep((s) => Math.min(s + 1, 4))
+  }
+
+  const handlePrev = () => setStep((s) => Math.max(s - 1, 1))
+
+  const toggleArea = (area: SupportArea) => {
+    const current = selectedAreas
+    const updated = current.includes(area) 
+      ? current.filter((a) => a !== area) 
+      : [...current, area]
+    setValue('supportAreas', updated, { shouldValidate: true })
+  }
+
+  const onSubmit: SubmitHandler<ParentClubRegistrationInput> = async (data) => {
+    setSubmitError('')
+    try {
+      const res = await fetch('/api/parent-club', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      })
+      if (!res.ok) {
+        const errorData = await res.json()
+        throw new Error(errorData.error || 'Error al enviar')
+      }
+      const responseData = await res.json()
+      track('parent_club_registration', { areas: data.supportAreas.length })
+      setCreatedId(responseData.registration?.id || null)
+      setCreatedEmail(responseData.registration?.email || data.email)
+      setSuccess(true)
+    } catch (e) {
+      setSubmitError((e as Error).message)
+    }
+  }
+
+  const handleGoHome = () => {
+    Object.keys(sessionStorage).forEach((key) => {
+      if (key.startsWith('dismissed_popup_')) sessionStorage.removeItem(key)
+    })
+    router.push('/')
+  }
+
+  
+
+  const handleCalendarClick = () => {
+    if (createdId) {
+      fetch('/api/parent-club/calendar-click', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: createdId }),
+      }).catch(() => {})
+    }
+  }
+
+  if (success && createdId && createdEmail) {
+    const verifyUrl = typeof window !== 'undefined'
+      ? `${window.location.origin}/verificar/${createdId}`
+      : `/verificar/${createdId}`
+    const calendarUrl = buildGoogleCalendarUrl({
+      title: CLUB_EVENT.title,
+      description: CLUB_EVENT.description,
+      location: CLUB_EVENT.location,
+      startUTC: CLUB_EVENT.startUTC,
+      endUTC: CLUB_EVENT.endUTC,
+    })
+
+    return (
+      <div className="bg-white rounded-[2rem] p-6 sm:p-8 shadow-lifted">
+        <div className="text-center">
+          <div className="mx-auto mb-4 grid size-16 place-items-center rounded-full bg-[#ece7f3] text-brand">
+            <PartyPopper className="size-8" />
+          </div>
+          <h2 className="text-2xl font-black text-ink">¡Postulación enviada!</h2>
+          <p className="mt-2 text-sm text-ink-muted">Nuestro equipo está revisando las solicitudes para la sesión gratuita. Nos pondremos en contacto contigo muy pronto para confirmar si has sido seleccionado.</p>
         </div>
 
         <div className="mt-6 rounded-2xl border-2 border-dashed border-brand/30 bg-[#f4f1fa] p-6 text-center">
@@ -100,16 +240,10 @@ export function ParentClubForm() {
           onClick={handleCalendarClick}
           className="mt-4 flex w-full items-center justify-center gap-2 rounded-full bg-brand px-6 py-3.5 text-sm font-black text-white shadow-md transition hover:bg-brand-deep"
         >
-          📅 Volver al inicio
+          📅 Añadir a mi calendario
         </a>
 
-        <button
-          type="button"
-          onClick={handleCancel}
-          className="mt-3 flex w-full items-center justify-center gap-2 rounded-full border-2 border-red-200 px-6 py-3 text-sm font-bold text-red-600 transition hover:bg-red-50"
-        >
-          
-        </button>
+        
 
         <button
           type="button"
