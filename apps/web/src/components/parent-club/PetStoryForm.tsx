@@ -2,16 +2,28 @@
 
 import { useState } from 'react'
 import { upload } from '@vercel/blob/client'
-import { Loader2, Upload, CheckCircle2 } from 'lucide-react'
+import imageCompression from 'browser-image-compression'
+import { Loader2, Upload, CheckCircle2, Image as ImageIcon } from 'lucide-react'
 import { Button } from '@repo/ui/components/button'
 import { toast } from '@repo/ui/components/sonner'
+import Image from 'next/image'
 
 export function PetStoryForm({ studentId, studentName }: { studentId: string, studentName: string }) {
   const [isUploading, setIsUploading] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
   const [story, setStory] = useState('')
   const [file, setFile] = useState<File | null>(null)
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [errorMsg, setErrorMsg] = useState('')
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0]
+    if (selectedFile) {
+      setFile(selectedFile)
+      const objectUrl = URL.createObjectURL(selectedFile)
+      setPreviewUrl(objectUrl)
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -26,16 +38,27 @@ export function PetStoryForm({ studentId, studentName }: { studentId: string, st
     console.log('1. Iniciando subida...')
 
     try {
-      const filename = `mascotas/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.]/g, '_')}`
-      console.log('2. Subiendo a Vercel Blob...', filename)
+      // Comprimir la imagen antes de subirla
+      console.log('2. Comprimiendo imagen...')
+      const options = {
+        maxSizeMB: 1,
+        maxWidthOrHeight: 1920,
+        useWebWorker: true,
+        fileType: 'image/webp' as const
+      }
+      const compressedFile = await imageCompression(file, options)
+      console.log(`3. Imagen comprimida: ${(compressedFile.size / 1024 / 1024).toFixed(2)} MB`)
+
+      const filename = `mascotas/${Date.now()}-${compressedFile.name.replace(/[^a-zA-Z0-9.]/g, '_')}`
+      console.log('4. Subiendo a Vercel Blob...')
       
-      const blob = await upload(filename, file, {
+      const blob = await upload(filename, compressedFile, {
         access: 'public',
         handleUploadUrl: '/api/upload',
       })
-      console.log('3. Foto subida con éxito:', blob.url)
+      console.log('5. Foto subida con éxito:', blob.url)
 
-      console.log('4. Guardando en base de datos...')
+      console.log('6. Guardando en base de datos...')
       const res = await fetch('/api/parent-club/pet-story', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -52,7 +75,7 @@ export function PetStoryForm({ studentId, studentName }: { studentId: string, st
         throw new Error(errorData.error || 'Error al guardar en la base de datos')
       }
 
-      console.log('5. Historia guardada exitosamente.')
+      console.log('7. Historia guardada exitosamente.')
       setIsSuccess(true)
       toast.success('¡Historia enviada con éxito!')
     } catch (error: any) {
@@ -88,12 +111,21 @@ export function PetStoryForm({ studentId, studentName }: { studentId: string, st
 
       <div>
         <label className="block text-sm font-bold mb-1">Tu foto</label>
-        <input 
-          type="file" 
-          accept="image/*"
-          onChange={(e) => setFile(e.target.files?.[0] || null)}
-          className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#ece7f3] file:text-[#4d2a80] hover:file:bg-[#b7ace5]"
-        />
+        <div className="flex items-center gap-4">
+          <div className="relative size-20 rounded-xl bg-gray-100 border border-dashed border-gray-300 flex items-center justify-center overflow-hidden shrink-0">
+            {previewUrl ? (
+              <Image src={previewUrl} alt="Vista previa" fill className="object-cover" unoptimized />
+            ) : (
+              <ImageIcon className="size-6 text-gray-400" />
+            )}
+          </div>
+          <input 
+            type="file" 
+            accept="image/*"
+            onChange={handleFileChange}
+            className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#ece7f3] file:text-[#4d2a80] hover:file:bg-[#b7ace5]"
+          />
+        </div>
       </div>
 
       <div>
