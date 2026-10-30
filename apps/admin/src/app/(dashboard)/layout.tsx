@@ -1,5 +1,5 @@
 import { connection } from 'next/server'
-import { countAppointmentsByStatus, countUnreadParentClubRegistrations } from '@repo/data-access'
+import { countAppointmentsByStatus, countUnreadParentClubRegistrations, countUnreadPetStories } from '@repo/data-access'
 import { can, ROLE_LABELS } from '@repo/domain'
 import { requireUser } from '@/lib/auth'
 import { initials } from '@/lib/format'
@@ -14,14 +14,16 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   const user = await requireUser()
   const items = NAV_ITEMS.filter((item) => can(user.role, item.permission))
-  const [counts, unreadForms] = await Promise.all([
+  const [counts, unreadForms, pendingPets] = await Promise.all([
     can(user.role, 'appointments:read') ? countAppointmentsByStatus() : null,
     can(user.role, 'settings:write') ? countUnreadParentClubRegistrations() : 0,
+    can(user.role, 'settings:write') ? countUnreadPetStories() : 0,
   ])
 
   const badges: Partial<Record<string, number>> = {}
   if (counts?.new) badges['/appointments'] = counts.new
   if (unreadForms > 0) badges['/formularios'] = unreadForms
+  if (pendingPets > 0) badges['/mascotas'] = pendingPets
 
   const userMenu = (
     <UserMenu

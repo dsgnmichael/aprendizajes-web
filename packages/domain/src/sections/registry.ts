@@ -333,6 +333,7 @@ export const customCtaSection = define({
   ],
 })
 
+
 export const sectionRegistry = {
   hero: heroSection,
   about: aboutSection,

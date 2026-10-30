@@ -66,7 +66,7 @@ async function VerificarContent({ params }: { params: Promise<{ id: string }> })
           <p className="text-xs text-muted-foreground">Fecha de registro: {new Date(registration.createdAt).toLocaleDateString('es-CL')}</p>
         </div>
       </div>
-    </div>
+</div>
   )
 }
 

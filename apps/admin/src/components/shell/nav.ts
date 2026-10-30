@@ -40,6 +40,12 @@ export const NAV_ITEMS: NavItem[] = [
     permission: 'professionals:read',
   },
   {
+    href: '/alumnos',
+    label: 'Alumnos',
+    icon: 'users',
+    permission: 'settings:write',
+  },
+  {
     href: '/testimonials',
     label: 'Testimonios',
     icon: 'testimonials',
@@ -54,6 +60,12 @@ export const NAV_ITEMS: NavItem[] = [
   {
     href: '/formularios',
     label: 'Formularios y respuestas',
+    icon: 'formularios',
+    permission: 'settings:write',
+  },
+  {
+    href: '/mascotas',
+    label: 'Mascotas',
     icon: 'formularios',
     permission: 'settings:write',
   },

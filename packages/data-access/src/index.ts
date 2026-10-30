@@ -15,3 +15,7 @@ export * from './repositories/home-page'
 
 export * from './repositories/popups'
 export * from './repositories/parent-club'
+
+export * from './repositories/pet-story'
+
+export * from './repositories/student'

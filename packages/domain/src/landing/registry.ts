@@ -407,6 +407,31 @@ export const landingGallerySection = define({
   fields: [title(), { kind: 'images', name: 'images', label: 'Imágenes' }],
 })
 
+
+export const petsWallSection = define({
+  type: 'petsWall',
+  label: 'Diario de Mascotas',
+  description: 'Carrusel de historias y fotos de los alumnos con las mascotas.',
+  icon: 'image',
+  variants: ['grid'],
+  variantLabels: { grid: 'Cuadrícula' },
+  singleton: true,
+  content: z.object({
+    title: optionalText(),
+    subtitle: optionalText(200),
+    duration: z.number().int().min(1).max(15).default(5),
+    showFormButton: z.boolean().default(true),
+    showInfoButton: z.boolean().default(false),
+  }),
+  fields: [
+    { kind: 'text', name: 'title', label: 'Título' },
+    { kind: 'text', name: 'subtitle', label: 'Subtítulo' },
+    { kind: 'number', name: 'duration', label: 'Tiempo entre fotos (segundos)', min: 1, max: 15, help: 'Por defecto 5 segundos' },
+    { kind: 'boolean', name: 'showFormButton', label: 'Mostrar botón "Llenar mi Diario"' },
+    { kind: 'boolean', name: 'showInfoButton', label: 'Mostrar botón "Conoce a las mascotas"' },
+  ],
+})
+
 export const landingSectionRegistry = {
   landingHero: landingHeroSection,
   stats: statsSection,
@@ -423,6 +448,7 @@ export const landingSectionRegistry = {
   contactBlock: contactBlockSection,
   landingRichText: landingRichTextSection,
   landingGallery: landingGallerySection,
+  petsWall: petsWallSection,
 } as const
 
 export type LandingSectionRegistry = typeof landingSectionRegistry
@@ -454,6 +480,7 @@ export const landingSectionSchema = z.discriminatedUnion('type', [
   instance(contactBlockSection),
   instance(landingRichTextSection),
   instance(landingGallerySection),
+  instance(petsWallSection),
 ])
 
 export type LandingSection = z.infer<typeof landingSectionSchema>

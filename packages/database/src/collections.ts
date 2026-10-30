@@ -18,6 +18,8 @@ import type {
   UserModel,
   PopupModel,
   ParentClubRegistrationModel,
+  StudentModel,
+  PetStoryModel,
 } from './models'
 
 export interface Collections {
@@ -37,6 +39,8 @@ export interface Collections {
   rateLimits: Collection<RateLimitModel>
   popups: Collection<PopupModel>
   parentClubRegistrations: Collection<ParentClubRegistrationModel>
+  petStories: Collection<PetStoryModel>
+  students: Collection<StudentModel>
 }
 
 export function collectionsFor(db: Db): Collections {
@@ -57,6 +61,8 @@ export function collectionsFor(db: Db): Collections {
     rateLimits: db.collection<RateLimitModel>(COLLECTIONS.rateLimits),
     popups: db.collection<PopupModel>(COLLECTIONS.popups),
     parentClubRegistrations: db.collection<ParentClubRegistrationModel>(COLLECTIONS.parentClubRegistrations),
+    petStories: db.collection<PetStoryModel>('petStories'),
+    students: db.collection<StudentModel>('students'),
   }
 }
 

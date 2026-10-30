@@ -27,7 +27,7 @@ const csp = [
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https://*.googleusercontent.com https://*.public.blob.vercel-storage.com https://maps.gstatic.com https://www.google-analytics.com",
   "font-src 'self'",
-  "connect-src 'self' https://www.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com",
+  "connect-src 'self' https://www.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com https://vercel.com https://*.public.blob.vercel-storage.com https://*.blob.vercel-storage.com",
   "frame-src 'none'",
   "object-src 'none'",
   "base-uri 'self'",
@@ -39,7 +39,7 @@ const csp = [
 const securityHeaders = [
   { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
   { key: 'X-Content-Type-Options', value: 'nosniff' },
-  { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=(), browsing-topics=()' },
+  { key: 'Permissions-Policy', value: 'camera=(self), microphone=(), geolocation=(), browsing-topics=()' },
   { key: 'Cross-Origin-Opener-Policy', value: 'same-origin' },
   ...(isProd ? [{ key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' }] : []),
 ]

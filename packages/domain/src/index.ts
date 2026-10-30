@@ -18,3 +18,5 @@ export * from './logic/analytics'
 export * from './logic/seo'
 
 export * from './schemas/parent-club'
+
+export * from './schemas/student'

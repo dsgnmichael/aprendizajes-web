@@ -1,6 +1,7 @@
 import type { LandingSection, LandingSectionType } from '@repo/domain'
 import type { ComponentType } from 'react'
 import { LandingHero } from './LandingHero'
+import { PetsWall } from './PetsWall'
 import {
   ContactBlock,
   CtaBanner,
@@ -39,6 +40,7 @@ export const landingComponents: { [T in LandingSectionType]: ComponentType<Landi
   contactBlock: ContactBlock,
   landingRichText: LandingRichText,
   landingGallery: LandingGallery,
+  petsWall: PetsWall,
 }
 
 export function RenderLandingSection({ section, ctx }: { section: LandingSection; ctx: LandingContext }) {

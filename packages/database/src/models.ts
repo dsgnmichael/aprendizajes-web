@@ -147,3 +147,25 @@ export interface HomePageRevisionModel {
 export type PopupModel = WithObjectId<PopupDocument>
 
 export type ParentClubRegistrationModel = WithObjectId<ParentClubRegistrationDocument>
+
+export interface PetStoryModel {
+  _id: ObjectId
+  studentId: ObjectId
+  studentName: string
+  imageUrl: string
+  story: string
+  status: 'pending' | 'approved' | 'rejected'
+  createdAt: Date
+  readAt: Date | null
+}
+
+export interface StudentModel {
+  _id: ObjectId
+  firstName: string
+  lastName: string
+  code: string
+  imageUrl?: string
+  hasPet: boolean
+  createdAt: Date
+  updatedAt: Date
+}
