@@ -25,7 +25,7 @@ export async function PetsWall({ section }: { section?: any } = {}) {
   const c = section?.content || {}
 
   return (
-    <section className="py-16 bg-canvas">
+    <section id="diario-mascotas" className="py-16 bg-canvas">
       <div className="mx-auto w-full max-w-content px-5 sm:px-8">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-black text-brand mb-2">

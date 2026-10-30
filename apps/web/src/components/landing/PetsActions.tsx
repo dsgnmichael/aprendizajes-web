@@ -14,6 +14,18 @@ export function PetsActions({ showFormButton, showInfoButton }: { showFormButton
   const [cameraError, setCameraError] = useState('')
   const scannerRef = useRef<Html5Qrcode | null>(null)
 
+  // Abrir automáticamente si la URL tiene ?open=true
+  useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search)
+    if (searchParams.get('open') === 'true') {
+      setIsOpen(true)
+      // Hacemos scroll hasta la sección para que se vea el modal centrado
+      setTimeout(() => {
+        document.getElementById('diario-mascotas')?.scrollIntoView({ behavior: 'smooth' })
+      }, 300)
+    }
+  }, [])
+
   useEffect(() => {
     if (!isOpen) return;
 
