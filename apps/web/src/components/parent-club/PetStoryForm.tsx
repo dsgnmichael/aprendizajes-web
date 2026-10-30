@@ -15,6 +15,9 @@ export function PetStoryForm({ studentId, studentName }: { studentId: string, st
   const [file, setFile] = useState<File | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [errorMsg, setErrorMsg] = useState('')
+  
+  // Extraer el primer nombre
+  const firstName = studentName.split(' ')[0]
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0]
@@ -91,7 +94,9 @@ export function PetStoryForm({ studentId, studentName }: { studentId: string, st
   return (
     <form onSubmit={handleSubmit} className="space-y-3">
       <div>
-        <h3 className="text-base font-black text-brand">Comparte tu experiencia con la mascota 🐾</h3>
+        <h3 className="text-base font-black text-brand">
+          Hola {firstName}, comparte tu experiencia con la mascota
+        </h3>
         <p className="text-xs text-ink-muted mt-0.5">Cuéntanos cómo fue esta experiencia y sube una foto para recordarlo.</p>
       </div>
 
