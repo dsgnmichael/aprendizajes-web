@@ -57,12 +57,7 @@ async function MascotaContent({ params }: { params: Promise<{ id: string }> }) {
   return (
     <>
       <div className="mx-auto max-w-lg rounded-[2rem] bg-white p-8 shadow-lifted mb-16">
-      <div className="text-left mb-8">
-        <h1 className="text-3xl font-black text-brand">Diario de nuestras mascotas 🐾</h1>
-        <p className="mt-2 text-sm text-ink-muted">
-          ¡Hola {student.firstName}! Nos encantaría saber cómo fue tu experiencia con la mascota. Cuéntanos tu anécdota y sube una foto para guardar este bonito recuerdo.
-        </p>
-      </div>
+      
 
       <PetStoryForm studentId={student._id.toString()} studentName={`${student.firstName} ${student.lastName}`} />
       </div>
