@@ -35,11 +35,8 @@ export function PetStoryForm({ studentId, studentName }: { studentId: string, st
     }
 
     setIsUploading(true)
-    console.log('1. Iniciando subida...')
 
     try {
-      // Comprimir la imagen antes de subirla
-      console.log('2. Comprimiendo imagen...')
       const options = {
         maxSizeMB: 1,
         maxWidthOrHeight: 1920,
@@ -47,18 +44,14 @@ export function PetStoryForm({ studentId, studentName }: { studentId: string, st
         fileType: 'image/webp' as const
       }
       const compressedFile = await imageCompression(file, options)
-      console.log(`3. Imagen comprimida: ${(compressedFile.size / 1024 / 1024).toFixed(2)} MB`)
 
       const filename = `mascotas/${Date.now()}-${compressedFile.name.replace(/[^a-zA-Z0-9.]/g, '_')}`
-      console.log('4. Subiendo a Vercel Blob...')
       
       const blob = await upload(filename, compressedFile, {
         access: 'public',
         handleUploadUrl: '/api/upload',
       })
-      console.log('5. Foto subida con éxito:', blob.url)
 
-      console.log('6. Guardando en base de datos...')
       const res = await fetch('/api/parent-club/pet-story', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -75,7 +68,6 @@ export function PetStoryForm({ studentId, studentName }: { studentId: string, st
         throw new Error(errorData.error || 'Error al guardar en la base de datos')
       }
 
-      console.log('7. Historia guardada exitosamente.')
       setIsSuccess(true)
       toast.success('¡Historia enviada con éxito!')
     } catch (error: any) {
@@ -88,7 +80,7 @@ export function PetStoryForm({ studentId, studentName }: { studentId: string, st
 
   if (isSuccess) {
     return (
-      <div className="mt-8 rounded-2xl border-2 border-green-200 bg-green-50 p-6 text-center">
+      <div className="mt-6 rounded-2xl border-2 border-green-200 bg-green-50 p-6 text-center">
         <CheckCircle2 className="mx-auto size-10 text-green-600 mb-2" />
         <h3 className="text-lg font-bold text-green-900">¡Gracias por compartir!</h3>
         <p className="text-sm text-green-700 mt-1">Tu anécdota con la mascota será publicada pronto.</p>
@@ -97,54 +89,67 @@ export function PetStoryForm({ studentId, studentName }: { studentId: string, st
   }
 
   return (
-    <form onSubmit={handleSubmit} className="mt-8 border-t pt-6 space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-3">
       <div>
-        <h3 className="text-lg font-black text-brand">Comparte tu experiencia con la mascota 🐾</h3>
-        <p className="text-sm text-ink-muted mt-1">Cuéntanos cómo fue esta experiencia y sube una foto para recordarlo.</p>
+        <h3 className="text-base font-black text-brand">Comparte tu experiencia con la mascota 🐾</h3>
+        <p className="text-xs text-ink-muted mt-0.5">Cuéntanos cómo fue esta experiencia y sube una foto para recordarlo.</p>
       </div>
 
       {errorMsg && (
-        <div className="rounded-xl bg-red-50 p-3 text-sm text-red-600 font-bold border border-red-200">
+        <div className="rounded-xl bg-red-50 p-2.5 text-xs text-red-600 font-bold border border-red-200">
           {errorMsg}
         </div>
       )}
 
       <div>
-        <label className="block text-sm font-bold mb-1">Tu foto</label>
-        <div className="flex items-center gap-4">
-          <div className="relative size-20 rounded-xl bg-gray-100 border border-dashed border-gray-300 flex items-center justify-center overflow-hidden shrink-0">
+        <label className="block text-sm font-bold mb-1.5">Tu foto</label>
+        <div className="flex items-center gap-3">
+          <div className="relative size-16 rounded-lg bg-gray-100 border border-dashed border-gray-300 flex items-center justify-center overflow-hidden shrink-0">
             {previewUrl ? (
               <Image src={previewUrl} alt="Vista previa" fill className="object-cover" unoptimized />
             ) : (
-              <ImageIcon className="size-6 text-gray-400" />
+              <ImageIcon className="size-5 text-gray-400" />
             )}
           </div>
-          <input 
-            type="file" 
-            accept="image/*"
-            onChange={handleFileChange}
-            className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#ece7f3] file:text-[#4d2a80] hover:file:bg-[#b7ace5]"
-          />
+          
+          <div className="flex flex-col">
+            <label 
+              htmlFor="file-upload" 
+              className="cursor-pointer inline-flex items-center justify-center rounded-full bg-[#ece7f3] px-4 py-1.5 text-sm font-bold text-[#4d2a80] hover:bg-[#b7ace5] transition-colors"
+            >
+              Buscar Imagen
+            </label>
+            <p className="text-xs text-gray-500 mt-1 truncate max-w-[200px]">
+              {file ? file.name : 'Ningún archivo seleccionado'}
+            </p>
+            <input 
+              id="file-upload"
+              type="file" 
+              accept="image/*"
+              onChange={handleFileChange}
+              className="hidden"
+            />
+          </div>
         </div>
       </div>
 
       <div>
-        <label className="block text-sm font-bold mb-1">Tu anécdota</label>
+        <label className="block text-sm font-bold mb-1.5">Tu anécdota</label>
         <textarea
           value={story}
           onChange={(e) => setStory(e.target.value)}
-          placeholder="Ej: La mascota estaba muy tranquila, pudimos acariciarla y nos tomamos una foto juntos..."
-          className="w-full rounded-xl border p-3 min-h-[100px] text-sm focus:border-brand focus:outline-none"
+          placeholder="Ej: La mascota estaba muy tranquila, pudimos acariciarla..."
+          className="w-full rounded-xl border p-2.5 min-h-[80px] text-sm focus:border-brand focus:outline-none"
           maxLength={300}
         />
         <div className="flex justify-end mt-1">
-          <span className={`text-xs ${story.length > 280 ? 'text-red-500 font-bold' : 'text-gray-400'}`}>
+          <span className={`text-[11px] ${story.length > 280 ? 'text-red-500 font-bold' : 'text-gray-400'}`}>
             {story.length}/300
           </span>
         </div>
       </div>
 
-      <Button type="submit" disabled={isUploading} className="w-full rounded-full bg-brand text-white font-bold py-3">
+      <Button type="submit" disabled={isUploading} className="w-full rounded-full bg-brand text-white font-bold py-2.5 text-sm">
         {isUploading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Subiendo...</> : <><Upload className="mr-2 h-4 w-4" /> Publicar historia</>}
       </Button>
     </form>
