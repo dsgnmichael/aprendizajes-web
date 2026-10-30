@@ -11,22 +11,31 @@ export function PetStoryForm({ studentId, studentName }: { studentId: string, st
   const [isSuccess, setIsSuccess] = useState(false)
   const [story, setStory] = useState('')
   const [file, setFile] = useState<File | null>(null)
+  const [errorMsg, setErrorMsg] = useState('')
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setErrorMsg('')
+    
     if (!file || !story) {
       toast.error('Por favor, sube una foto y escribe tu anécdota.')
       return
     }
 
     setIsUploading(true)
+    console.log('1. Iniciando subida...')
+
     try {
       const filename = `mascotas/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.]/g, '_')}`
+      console.log('2. Subiendo a Vercel Blob...', filename)
+      
       const blob = await upload(filename, file, {
         access: 'public',
         handleUploadUrl: '/api/upload',
       })
+      console.log('3. Foto subida con éxito:', blob.url)
 
+      console.log('4. Guardando en base de datos...')
       const res = await fetch('/api/parent-club/pet-story', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -40,14 +49,15 @@ export function PetStoryForm({ studentId, studentName }: { studentId: string, st
 
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({}))
-        throw new Error(errorData.error || 'Error al guardar la historia')
+        throw new Error(errorData.error || 'Error al guardar en la base de datos')
       }
 
+      console.log('5. Historia guardada exitosamente.')
       setIsSuccess(true)
       toast.success('¡Historia enviada con éxito!')
-    } catch (error) {
-      console.error(error)
-      toast.error('Hubo un error al subir tu historia. Intenta de nuevo.')
+    } catch (error: any) {
+      console.error('❌ ERROR DETALLADO:', error)
+      setErrorMsg(error.message || 'Hubo un error al subir tu historia. Intenta de nuevo.')
     } finally {
       setIsUploading(false)
     }
@@ -66,9 +76,15 @@ export function PetStoryForm({ studentId, studentName }: { studentId: string, st
   return (
     <form onSubmit={handleSubmit} className="mt-8 border-t pt-6 space-y-4">
       <div>
-        <h3 className="text-lg font-black text-brand">Escribe tu historia 📝</h3>
-        <p className="text-sm text-ink-muted mt-1">Sube una foto y cuéntanos lo que más te gustó de esta experiencia.</p>
+        <h3 className="text-lg font-black text-brand">Comparte tu experiencia con la mascota 🐾</h3>
+        <p className="text-sm text-ink-muted mt-1">Cuéntanos cómo fue esta experiencia y sube una foto para recordarlo.</p>
       </div>
+
+      {errorMsg && (
+        <div className="rounded-xl bg-red-50 p-3 text-sm text-red-600 font-bold border border-red-200">
+          {errorMsg}
+        </div>
+      )}
 
       <div>
         <label className="block text-sm font-bold mb-1">Tu foto</label>
