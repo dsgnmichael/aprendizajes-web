@@ -20,7 +20,7 @@ export default function ParentClubPage() {
           <p className="script text-4xl text-brand">Invitación Especial</p>
           <h1 className="mt-4 text-4xl font-black text-ink uppercase tracking-tight">Reserva tu lugar</h1>
           <p className="mt-4 text-lg text-ink-muted">
-            Te invitamos a nuestra primera sesión gratuita, un espacio pensado para ti donde compartiremos el corazón de nuestro Club de Padres.
+            Te invitamos a nuestro primer encuentro gratuito de Madres, un espacio pensado para ti.
           </p>
         </div>
         

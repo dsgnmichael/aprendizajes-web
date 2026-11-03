@@ -210,7 +210,7 @@ export function ParentClubForm() {
             <PartyPopper className="size-8" />
           </div>
           <h2 className="text-2xl font-black text-ink">¡Postulación enviada!</h2>
-          <p className="mt-2 text-sm text-ink-muted">Nuestro equipo está revisando las solicitudes para la sesión gratuita. Nos pondremos en contacto contigo muy pronto para confirmar si has sido seleccionado.</p>
+          <p className="mt-2 text-sm text-ink-muted">Nuestro equipo está revisando las solicitudes para el encuentro gratuito. Nos pondremos en contacto contigo muy pronto para confirmar si has sido seleccionada.</p>
         </div>
 
         <div className="mt-6 rounded-2xl border-2 border-dashed border-brand/30 bg-[#f4f1fa] p-6 text-center">
@@ -225,7 +225,7 @@ export function ParentClubForm() {
         </div>
 
         <div className="mt-4 space-y-1.5 rounded-xl bg-muted/30 p-4">
-          <p className="text-sm font-bold text-ink">📅 Sábado 31 de octubre de 2026</p>
+          <p className="text-sm font-bold text-ink">📅 Sábado 07 de Noviembre</p>
           <p className="text-sm text-ink-muted">🕙 10:00 AM - 12:00 PM</p>
           <p className="text-sm text-ink-muted">📍 Av. El Paseo, Los Rosales, Caracas</p>
           <a href={CLUB_EVENT.mapsUrl} target="_blank" rel="noopener noreferrer" className="inline-block text-sm font-medium text-brand underline">

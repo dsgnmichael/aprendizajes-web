@@ -31,7 +31,7 @@ export const CLUB_EVENT = {
     'Te esperamos en la primera actividad para padres de Aprendizajess. ' +
     'Traé tu credencial (correo electrónico) o el QR. Cualquier duda: +58 424 121 4452.',
   location: 'Av. El Paseo, Los Rosales, Caracas, Distrito Capital',
-  startUTC: '20261031T140000Z', // 31 Oct 2026 10:00 AM Venezuela
-  endUTC: '20261031T160000Z',   // 31 Oct 2026 12:00 PM Venezuela
+  startUTC: '20261107T140000Z', // 31 Oct 2026 10:00 AM Venezuela
+  endUTC: '20261107T160000Z',   // 31 Oct 2026 12:00 PM Venezuela
   mapsUrl: 'https://maps.app.goo.gl/vm21V6L3KEkgjJ9Q7',
 }

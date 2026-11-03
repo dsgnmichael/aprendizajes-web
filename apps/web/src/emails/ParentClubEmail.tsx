@@ -49,20 +49,20 @@ export const ParentClubEmail = ({
               ¡Hola, {firstName}!
             </Heading>
             <Text style={heroSubtitle}>
-              Gracias por postularte a nuestra primera actividad. Hemos recibido tu información correctamente.
+              Gracias por postularte a nuestro primer encuentro de madres. Hemos recibido tu información correctamente.
             </Text>
             <Text style={heroSubtitle}>
-              Nuestro equipo está revisando las solicitudes para la sesión gratuita. Nos pondremos en contacto contigo muy pronto para confirmar si has sido seleccionado/a.
+              Nuestro equipo está revisando las solicitudes para el encuentro gratuito. Nos pondremos en contacto contigo muy pronto para confirmar si has sido seleccionada.
             </Text>
             <Text style={heroSubtitle}>
-              Si en esta oportunidad no eres seleccionado/a, no te preocupes. Estamos preparando muchas más actividades y serás de los primeros en enterarte.
+              Si en esta oportunidad no eres elegida, no te preocupes. Estamos preparando muchas más actividades y serás de las primeras en enterarte.
             </Text>
           </Section>
 
           <Section style={cardWrapper}>
             <Section style={cardSection}>
               <Text style={cardKicker}>Detalles del Evento</Text>
-              <Text style={{ textAlign: 'center', color: '#4d2a80', fontWeight: 'bold', margin: '0 0 8px 0' }}>Sábado 31 de Octubre</Text>
+              <Text style={{ textAlign: 'center', color: '#4d2a80', fontWeight: 'bold', margin: '0 0 8px 0' }}>Sábado 07 de Noviembre</Text>
               <Text style={{ textAlign: 'center', color: '#1a1a1a', margin: '0 0 8px 0' }}>10:00 AM - 12:00 PM</Text>
               <Text style={{ textAlign: 'center', color: '#5a5566', fontSize: '14px', margin: '0' }}>Av. El Paseo, Los Rosales, Caracas</Text>
             </Section>
@@ -70,12 +70,10 @@ export const ParentClubEmail = ({
 
           <Section style={credentialWrapper}>
             <Section style={credentialSection}>
-              <Text style={credentialKicker}>Tu Comprobante de Postulación</Text>
-              <Text style={emailText}>{email}</Text>
-              {qrCodeDataUrl ? (
-                <Img src={qrCodeDataUrl} width="140" height="140" alt="Código QR" style={{ margin: '0 auto', display: 'block', borderRadius: '16px', border: '4px solid #ffffff', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} />
-              ) : null}
-              <Text style={noteText}>Guarda este correo. Si eres seleccionado, te pediremos este código en la entrada.</Text>
+              <Text style={credentialKicker}>¡Trae algo para compartir!</Text>
+              <Text style={{ color: '#5a5566', fontSize: '16px', lineHeight: '1.6', margin: '0', fontWeight: 'bold' }}>
+                Para que este encuentro sea aún más dulce, trae un snack para compartir. ¡Haremos una mesa especial donde degustaremos juntas!
+              </Text>
             </Section>
           </Section>
 
