@@ -164,6 +164,7 @@ export async function saveMediaMetadataAction(data: {
 
     return {
       ...doc,
+      _id: _id.toHexString(),
       id: _id.toHexString(),
       createdAt: now.toISOString()
     }
