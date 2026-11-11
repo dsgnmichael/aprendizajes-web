@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { upload } from '@vercel/blob/client'
+import { compressImageIfNeeded } from '@/lib/compress-image'
 import imageCompression from 'browser-image-compression'
 import { Loader2, Upload, CheckCircle2, Image as ImageIcon } from 'lucide-react'
 import { Button } from '@repo/ui/components/button'

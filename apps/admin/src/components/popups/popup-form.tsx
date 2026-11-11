@@ -7,6 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { type PopupDocument, popupInputSchema, type PopupInput, type PopupSlide, MEDIA_LIMITS } from '@repo/domain'
 import { Plus, Trash2, X, MousePointerClick, Image as ImageIcon, Loader2, Upload, GripVertical } from 'lucide-react'
 import { upload } from '@vercel/blob/client'
+import { compressImageIfNeeded } from '@/lib/compress-image'
 import { toast } from '@repo/ui/components/sonner'
 import { createPopupAction, updatePopupAction } from '@/app/(dashboard)/popups/actions'
 import { saveMediaMetadataAction } from '@/actions/media'
@@ -149,7 +150,11 @@ export function PopupForm({
 
         try {
           const { width, height } = await getDimensions(file)
-          const blob = await upload(file.name, file, {
+          const blob = const fileToUpload = await compressImageIfNeeded(file);
+      const blob = await upload(`popups/${Date.now()}-${fileToUpload.name.replace(/[^a-zA-Z0-9.]/g, '_')}`, fileToUpload, {
+        access: 'public',
+        handleUploadUrl: '/api/upload',
+      }); {
             access: 'public',
             handleUploadUrl: '/api/upload',
           })
