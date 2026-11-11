@@ -115,9 +115,9 @@ export function PopupManager() {
     const timer = setTimeout(() => {
       if (currentSlide === slides.length - 1) {
         if (openedManually) {
-          setCurrentSlide(0) // Repetir infinito si es manual
+          setCurrentSlide(0)
         } else {
-          handleClose() // Cerrar si es automático
+          handleClose()
         }
       } else {
         setCurrentSlide(prev => prev + 1)
@@ -142,6 +142,14 @@ export function PopupManager() {
     setCurrentSlide(0)
   }
 
+  const handleDragEnd = (e: any, { offset }: any) => {
+    if (offset.x < -50 && currentSlide < slides.length - 1) {
+      setCurrentSlide(prev => prev + 1)
+    } else if (offset.x > 50 && currentSlide > 0) {
+      setCurrentSlide(prev => prev - 1)
+    }
+  }
+
   const imageSrc = activeSlide?.image ? (typeof activeSlide.image === 'string' ? activeSlide.image : (activeSlide.image as any)?.url) : ''
 
   return (
@@ -153,72 +161,85 @@ export function PopupManager() {
       )}
 
       {shouldShow && !isMinimized && activePopup && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center p-4">
           <m.div initial={{ opacity: 0 }} animate={{ opacity: isMinimizing ? 0 : 1 }} className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
           
-          <m.div initial={{ opacity: 0, scale: 0.9, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} className="relative w-full max-w-[340px] sm:max-w-[420px] bg-white rounded-3xl overflow-hidden shadow-2xl">
+          <div className="relative flex flex-col items-center max-w-[340px] sm:max-w-[420px] w-full z-10">
             
-            {/* Controles superiores */}
-            <div className="absolute top-4 right-4 z-30 flex gap-2">
-              {durationPerSlide > 0 && (
-                <button onClick={() => setIsPaused(!isPaused)} className="grid size-8 place-items-center rounded-full bg-black/40 text-white hover:bg-black/60 backdrop-blur-md">
-                  {isPaused ? <Play className="size-4 ml-0.5" /> : <Pause className="size-4" />}
+            <m.div initial={{ opacity: 0, scale: 0.9, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} className="relative w-full bg-white rounded-3xl overflow-hidden shadow-2xl">
+              
+              <div className="absolute top-4 right-4 z-30 flex gap-2">
+                {durationPerSlide > 0 && (
+                  <button onClick={() => setIsPaused(!isPaused)} className="grid size-8 place-items-center rounded-full bg-black/40 text-white hover:bg-black/60 backdrop-blur-md">
+                    {isPaused ? <Play className="size-4 ml-0.5" /> : <Pause className="size-4" />}
+                  </button>
+                )}
+                <button onClick={handleClose} className="grid size-8 place-items-center rounded-full bg-black/40 text-white hover:bg-black/60 backdrop-blur-md">
+                  <X className="size-5" />
                 </button>
-              )}
-              <button onClick={handleClose} className="grid size-8 place-items-center rounded-full bg-black/40 text-white hover:bg-black/60 backdrop-blur-md">
-                <X className="size-5" />
-              </button>
-            </div>
+              </div>
 
-            {/* Imagen */}
-            <div className="relative w-full aspect-[4/5] sm:aspect-[3/4] bg-gray-100">
-              {imageSrc ? <img src={imageSrc} alt="Popup" className="w-full h-full object-cover" /> : <div className="absolute inset-0 flex items-center justify-center text-gray-400">Imagen no disponible</div>}
+              <m.div 
+                className="relative w-full aspect-[4/5] sm:aspect-[3/4] bg-gray-100 cursor-grab active:cursor-grabbing"
+                drag="x"
+                dragConstraints={{ left: 0, right: 0 }}
+                dragElastic={0.2}
+                onDragEnd={handleDragEnd}
+              >
+                {imageSrc ? <img src={imageSrc} alt="Popup" className="w-full h-full object-cover pointer-events-none" /> : <div className="absolute inset-0 flex items-center justify-center text-gray-400">Imagen no disponible</div>}
 
-              {/* Flechas */}
-              {slides.length > 1 && (
-                <>
-                  <button onClick={() => setCurrentSlide(p => Math.max(0, p - 1))} disabled={currentSlide === 0} className="absolute left-3 top-1/2 -translate-y-1/2 z-20 bg-white/80 rounded-full p-2 shadow-md hover:bg-white disabled:opacity-30">
-                    <ChevronLeft className="size-5 text-brand" />
-                  </button>
-                  <button onClick={() => setCurrentSlide(p => Math.min(slides.length - 1, p + 1))} disabled={currentSlide === slides.length - 1} className="absolute right-3 top-1/2 -translate-y-1/2 z-20 bg-white/80 rounded-full p-2 shadow-md hover:bg-white disabled:opacity-30">
-                    <ChevronRight className="size-5 text-brand" />
-                  </button>
-                </>
-              )}
+                {slides.length > 1 && (
+                  <>
+                    <button onClick={() => setCurrentSlide(p => Math.max(0, p - 1))} disabled={currentSlide === 0} className="absolute left-3 top-1/2 -translate-y-1/2 z-20 bg-white/80 rounded-full p-2 shadow-md hover:bg-white disabled:opacity-30 pointer-events-auto">
+                      <ChevronLeft className="size-5 text-brand" />
+                    </button>
+                    <button onClick={() => setCurrentSlide(p => Math.min(slides.length - 1, p + 1))} disabled={currentSlide === slides.length - 1} className="absolute right-3 top-1/2 -translate-y-1/2 z-20 bg-white/80 rounded-full p-2 shadow-md hover:bg-white disabled:opacity-30 pointer-events-auto">
+                      <ChevronRight className="size-5 text-brand" />
+                    </button>
+                  </>
+                )}
 
-              {/* Botones de Diapositiva (Configurados en el Backoffice) */}
-              {activeSlide?.buttons?.map((btn, i) => (
-                <a key={`s-btn-${i}`} href={btn.url} className="absolute -translate-x-1/2 -translate-y-1/2 px-6 py-2.5 rounded-full font-bold shadow-lg hover:scale-105 transition-transform z-20 text-sm whitespace-nowrap"
-                  style={{ left: `${btn.x}%`, top: `${btn.y}%`, backgroundColor: btn.style === 'white' ? '#fff' : btn.style === 'light' ? '#ece7f3' : '#4d2a80', color: btn.style === 'white' ? '#4d2a80' : btn.style === 'light' ? '#4d2a80' : '#fff' }}>
-                  {btn.label}
-                </a>
-              ))}
+                {(() => {
+                  const persistentButtons = slides[0]?.buttons || [];
+                  const globalButtons = activePopup?.buttons || [];
+                  const allButtons = [...persistentButtons, ...globalButtons];
 
-              {/* Botones Globales */}
-              {activePopup?.buttons?.map((btn, i) => (
-                <a key={`g-btn-${i}`} href={btn.url} className="absolute -translate-x-1/2 -translate-y-1/2 px-6 py-2.5 rounded-full font-bold shadow-lg hover:scale-105 transition-transform z-30 text-sm whitespace-nowrap"
-                  style={{ left: `${btn.x}%`, top: `${btn.y}%`, backgroundColor: btn.style === 'white' ? '#fff' : btn.style === 'light' ? '#ece7f3' : '#4d2a80', color: btn.style === 'white' ? '#4d2a80' : btn.style === 'light' ? '#4d2a80' : '#fff' }}>
-                  {btn.label}
-                </a>
-              ))}
+                  return allButtons.map((btn, i) => (
+                    <a key={`btn-${i}`} href={btn.url} className="absolute -translate-x-1/2 -translate-y-1/2 px-6 py-2.5 rounded-full font-bold shadow-lg hover:scale-105 transition-transform z-20 text-sm whitespace-nowrap pointer-events-auto"
+                      style={{ 
+                        left: `${btn.x}%`, 
+                        top: `${btn.y}%`, 
+                        backgroundColor: btn.style === 'white' ? '#fff' : btn.style === 'light' ? '#ece7f3' : '#4d2a80', 
+                        color: btn.style === 'white' ? '#4d2a80' : btn.style === 'light' ? '#4d2a80' : '#fff' 
+                      }}>
+                      {btn.label}
+                    </a>
+                  ));
+                })()}
 
-              {/* Barra de Progreso */}
-              {slides.length > 0 && durationPerSlide > 0 && (
-                <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-gray-100 z-30">
-                   <m.div key={currentSlide} initial={{ width: 0 }} animate={{ width: isPaused ? '0%' : '100%' }} transition={{ duration: durationPerSlide, ease: 'linear' }} className="h-full bg-brand" />
-                </div>
-              )}
+                {slides.length > 0 && durationPerSlide > 0 && (
+                  <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-gray-100 z-30">
+                     <m.div key={currentSlide} initial={{ width: 0 }} animate={{ width: isPaused ? '0%' : '100%' }} transition={{ duration: durationPerSlide, ease: 'linear' }} className="h-full bg-brand" />
+                  </div>
+                )}
+              </m.div>
+            </m.div>
 
-              {/* Puntos */}
-              {slides.length > 1 && (
-                <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2 z-20">
-                  {slides.map((_, i) => (
-                    <button key={`dot-${i}`} onClick={() => setCurrentSlide(i)} className={`h-2 rounded-full transition-all ${i === currentSlide ? 'w-8 bg-brand' : 'w-2 bg-white/80 hover:bg-white'}`} />
-                  ))}
-                </div>
-              )}
-            </div>
-          </m.div>
+            {slides.length > 1 && (
+              <div className="flex justify-center items-center gap-2 mt-6">
+                {slides.map((_, i) => (
+                  <button
+                    key={`dot-${i}`}
+                    onClick={() => setCurrentSlide(i)}
+                    className={`h-2.5 rounded-full transition-all duration-300 ${
+                      i === currentSlide ? "w-8 bg-brand" : "w-2.5 bg-white/60 hover:bg-white"
+                    }`}
+                  />
+                ))}
+              </div>
+            )}
+
+          </div>
         </div>
       )}
 
