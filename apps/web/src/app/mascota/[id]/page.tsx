@@ -86,3 +86,5 @@ export default function MascotaPage({ params }: { params: Promise<{ id: string }
     </main>
   )
 }
+
+// Vercel Build Trigger
