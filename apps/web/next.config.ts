@@ -25,7 +25,7 @@ const csp = [
   // except Google Analytics (only loaded when configured).
   `script-src 'self' 'unsafe-inline'${isProd ? '' : " 'unsafe-eval'"} https://www.googletagmanager.com`,
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob: https://*.googleusercontent.com https://*.public.blob.vercel-storage.com https://maps.gstatic.com https://www.google-analytics.com",
+  "img-src 'self' data: blob: https://*.googleusercontent.com https://*.public.blob.vercel-storage.com https://images.unsplash.com https://maps.gstatic.com https://www.google-analytics.com",
   "font-src 'self'",
   "connect-src 'self' https://www.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com https://vercel.com https://*.public.blob.vercel-storage.com https://*.blob.vercel-storage.com",
   "frame-src 'none'",
