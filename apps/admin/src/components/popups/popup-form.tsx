@@ -150,11 +150,8 @@ export function PopupForm({
 
         try {
           const { width, height } = await getDimensions(file)
-          const blob = const fileToUpload = await compressImageIfNeeded(file);
-      const blob = await upload(`popups/${Date.now()}-${fileToUpload.name.replace(/[^a-zA-Z0-9.]/g, '_')}`, fileToUpload, {
-        access: 'public',
-        handleUploadUrl: '/api/upload',
-      }); {
+          const fileToUpload = await compressImageIfNeeded(file)
+          const blob = await upload(fileToUpload.name, fileToUpload, {
             access: 'public',
             handleUploadUrl: '/api/upload',
           })
