@@ -126,13 +126,24 @@ export function PetStoryCard({ story }: { story: any }) {
           <p className="text-sm text-gray-600 italic flex-1 mb-4">"{story.story}"</p>
         )}
 
-        <div className="mt-auto flex gap-2">
+        <div className="mt-auto flex flex-wrap gap-2 pt-2">
           {isEditing ? (
             <>
-              <Button variant="outline" size="sm" className="flex-1" onClick={() => { setIsEditing(false); setImage(story.imageUrl); setText(story.story); }} disabled={isSaving || isUploading}>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="flex-1 min-w-[100px] border-gray-300 text-gray-700 hover:bg-gray-50" 
+                onClick={() => { setIsEditing(false); setImage(story.imageUrl); setText(story.story); }} 
+                disabled={isSaving || isUploading}
+              >
                 <X className="size-4 mr-1" /> Cancelar
               </Button>
-              <Button size="sm" className="flex-1 bg-brand hover:bg-brand-deep" onClick={handleSave} disabled={isSaving || isUploading}>
+              <Button 
+                size="sm" 
+                className="flex-1 min-w-[100px] bg-brand hover:bg-brand-deep text-white font-bold" 
+                onClick={handleSave} 
+                disabled={isSaving || isUploading}
+              >
                 {isSaving ? <Loader2 className="size-4 mr-1 animate-spin" /> : <Save className="size-4 mr-1" />} Guardar
               </Button>
             </>
