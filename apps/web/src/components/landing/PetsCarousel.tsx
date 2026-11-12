@@ -52,7 +52,7 @@ export function PetsCarousel({ stories, duration = 5000 }: { stories: any[], dur
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
-      <div className="relative min-h-[450px] md:min-h-[400px] flex items-center justify-center">
+      <div className="relative w-full max-w-lg md:max-w-3xl mx-auto min-h-[450px] md:min-h-[450px] flex items-center justify-center">
         <AnimatePresence initial={false} custom={direction}>
           <motion.div
             key={index}
@@ -68,8 +68,8 @@ export function PetsCarousel({ stories, duration = 5000 }: { stories: any[], dur
             onDragEnd={handleDragEnd}
             className="absolute w-full bg-white rounded-[2rem] shadow-soft border border-gray-100 flex flex-col md:flex-row overflow-hidden cursor-grab active:cursor-grabbing"
           >
-            <div className="relative w-full md:w-1/2 h-[350px] md:h-auto md:min-h-[400px] bg-gray-100 pointer-events-none">
-              <Image src={current.imageUrl} alt="Mascota" fill className="object-cover" unoptimized />
+            <div className="relative w-full md:w-1/2 h-[350px] md:h-[450px] bg-gray-50 pointer-events-none rounded-t-[2rem] md:rounded-l-[2rem] md:rounded-tr-none">
+              <Image src={current.imageUrl} alt="Mascota" fill className="object-contain p-2" unoptimized />
             </div>
             <div className="w-full md:w-1/2 p-6 md:p-8 flex flex-col justify-center pointer-events-none">
               <div className="mb-3">
