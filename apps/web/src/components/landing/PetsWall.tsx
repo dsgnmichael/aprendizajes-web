@@ -1,26 +1,20 @@
 import { listApprovedPetStories } from '@repo/data-access'
-import { unstable_cache } from 'next/cache'
 import { PetsCarousel } from './PetsCarousel'
 import { PetsActions } from './PetsActions'
 
-const getStories = unstable_cache(
-  async () => {
-    const stories = await listApprovedPetStories()
-    return stories.map((s) => ({
-      _id: s._id.toString(),
-      imageUrl: s.imageUrl,
-      studentName: s.studentName,
-      story: s.story,
-      createdAt: s.createdAt ? s.createdAt.toISOString() : new Date().toISOString(),
-    }))
-  },
-  ['pet-stories'],
-  { revalidate: 0, tags: ['pet-stories'] }
-)
-
 export async function PetsWall({ section }: { section?: any } = {}) {
-  const stories = await getStories()
+  // Consultamos siempre la base de datos para tener la foto más reciente
+  const stories = await listApprovedPetStories()
+  
   if (stories.length === 0) return null
+
+  const safeStories = stories.map((s) => ({
+    _id: s._id.toString(),
+    imageUrl: s.imageUrl,
+    studentName: s.studentName,
+    story: s.story,
+    createdAt: s.createdAt ? s.createdAt.toISOString() : new Date().toISOString(),
+  }))
 
   const c = section?.content || {}
 
@@ -38,7 +32,7 @@ export async function PetsWall({ section }: { section?: any } = {}) {
           )}
         </div>
         
-        <PetsCarousel stories={stories} duration={(c.duration || 5) * 1000} />
+        <PetsCarousel stories={safeStories} duration={(c.duration || 5) * 1000} />
         
         <PetsActions showFormButton={c.showFormButton} showInfoButton={c.showInfoButton} />
       </div>

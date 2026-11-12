@@ -6,6 +6,7 @@ export default async function MascotasPage() {
   const stories = await listPetStories()
 
   const safeStories = stories.map(s => ({
+    id: s._id.toString(),
     ...s,
     _id: s._id.toString(),
     createdAt: s.createdAt?.toISOString() || null,
