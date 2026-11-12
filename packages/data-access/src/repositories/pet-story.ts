@@ -16,9 +16,12 @@ export async function deletePetStory(id: string) {
   await c.petStories.deleteOne({ _id: new ObjectId(id) })
 }
 
-export async function updatePetStoryText(id: string, story: string) {
+export async function updatePetStory(id: string, data: { story?: string; imageUrl?: string }) {
   const c = await collections()
-  await c.petStories.updateOne({ _id: new ObjectId(id) }, { $set: { story } })
+  await c.petStories.updateOne(
+    { _id: new ObjectId(id) },
+    { $set: data }
+  )
 }
 
 export async function listApprovedPetStories() {

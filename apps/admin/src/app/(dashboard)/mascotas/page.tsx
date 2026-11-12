@@ -1,60 +1,30 @@
-import { listPetStories, updatePetStoryStatus, deletePetStory, updatePetStoryText } from '@repo/data-access'
-import { revalidatePath } from 'next/cache'
+import { listPetStories } from '@repo/data-access'
 import { PetStoryCard } from '@/components/mascotas/PetStoryCard'
 import { MarkAsReadTrigger } from '@/components/mascotas/MarkAsReadTrigger'
 
 export default async function MascotasPage() {
   const stories = await listPetStories()
 
-  async function updateStatus(id: string, status: 'approved' | 'rejected') {
-    'use server'
-    await updatePetStoryStatus(id, status)
-    revalidatePath('/mascotas')
-  }
-
-  async function deleteStory(id: string) {
-    'use server'
-    await deletePetStory(id)
-    revalidatePath('/mascotas')
-  }
-
-  async function editText(id: string, text: string) {
-    'use server'
-    await updatePetStoryText(id, text)
-    revalidatePath('/mascotas')
-  }
+  const safeStories = stories.map(s => ({
+    ...s,
+    _id: s._id.toString(),
+    createdAt: s.createdAt?.toISOString() || null,
+  }))
 
   return (
-    <div className="p-8 max-w-6xl mx-auto">
-      <h1 className="text-3xl font-black mb-2 text-brand">Historias de Mascotas 🐾</h1>
-      <p className="text-muted-foreground mb-8">Revisa, edita o elimina las anécdotas que suben los alumnos.</p>
+    <div className="p-8 max-w-7xl mx-auto">
       <MarkAsReadTrigger />
-
-      {stories.length === 0 ? (
-        <div className="text-center p-12 bg-muted/30 rounded-2xl">
-          <p className="text-muted-foreground">Aún no hay historias enviadas.</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {stories.map((story) => (
-            <PetStoryCard 
-              key={story._id.toString()} 
-              story={{
-                _id: story._id.toString(),
-                studentId: story.studentId?.toString() || '',
-                studentName: story.studentName,
-                imageUrl: story.imageUrl,
-                story: story.story,
-                status: story.status,
-                createdAt: story.createdAt?.toISOString() || null
-              }} 
-              onUpdateStatus={updateStatus}
-              onDelete={deleteStory}
-              onEditText={editText}
-            />
-          ))}
-        </div>
-      )}
+      <div className="mb-8">
+        <h1 className="text-3xl font-black text-brand">Historias de Mascotas 🐾</h1>
+        <p className="text-muted-foreground mt-1">Revisa, edita o elimina las anécdotas que suben los alumnos.</p>
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {safeStories.map((story) => (
+          <PetStoryCard key={story._id} story={story} />
+        ))}
+        {safeStories.length === 0 && <p className="text-gray-500">No hay historias todavía.</p>}
+      </div>
     </div>
   )
 }

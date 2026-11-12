@@ -1,7 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { updatePetStoryStatus, deletePetStory, updatePetStory } from '@repo/data-access'
+import { updatePetStoryStatus, deletePetStory, updatePetStory, markPetStoriesAsRead } from '@repo/data-access'
 
 export async function updatePetStoryStatusAction(id: string, status: 'pending' | 'approved' | 'rejected') {
   await updatePetStoryStatus(id, status)
@@ -21,6 +21,12 @@ export async function updatePetStoryTextAction(id: string, story: string) {
 
 export async function updatePetStoryImageAction(id: string, imageUrl: string) {
   await updatePetStory(id, { imageUrl })
+  revalidatePath('/mascotas')
+  return { success: true }
+}
+
+export async function markMascotasAsReadAction() {
+  await markPetStoriesAsRead()
   revalidatePath('/mascotas')
   return { success: true }
 }
