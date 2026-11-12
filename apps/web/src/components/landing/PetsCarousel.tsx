@@ -68,7 +68,7 @@ export function PetsCarousel({ stories, duration = 5000 }: { stories: any[], dur
             onDragEnd={handleDragEnd}
             className="absolute w-full bg-white rounded-[2rem] shadow-soft border border-gray-100 flex flex-col md:flex-row overflow-hidden cursor-grab active:cursor-grabbing"
           >
-            <div className="relative w-full md:w-1/2 h-[250px] md:h-auto md:min-h-[400px] bg-gray-100 pointer-events-none">
+            <div className="relative w-full md:w-1/2 h-[350px] md:h-auto md:min-h-[400px] bg-gray-100 pointer-events-none">
               <Image src={current.imageUrl} alt="Mascota" fill className="object-cover" unoptimized />
             </div>
             <div className="w-full md:w-1/2 p-6 md:p-8 flex flex-col justify-center pointer-events-none">
