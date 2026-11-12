@@ -1,19 +1,26 @@
-﻿'use client'
+'use client'
 
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
+import { createPortal } from 'react-dom'
 import { X, KeyRound, ScanLine, Loader2 } from 'lucide-react'
 import { Html5Qrcode } from 'html5-qrcode'
 
 export function PetsActions({ showFormButton, showInfoButton }: { showFormButton?: boolean, showInfoButton?: boolean }) {
   const router = useRouter()
   const [isOpen, setIsOpen] = useState(false)
+  const [mounted, setMounted] = useState(false)
   const [mode, setMode] = useState<'scan' | 'manual'>('scan')
   const [code, setCode] = useState('')
   const [error, setError] = useState('')
   const [cameraError, setCameraError] = useState('')
   const [isChecking, setIsChecking] = useState(false)
   const scannerRef = useRef<Html5Qrcode | null>(null)
+
+  // Asegurarnos de que estamos en el cliente para usar Portals
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   // Abrir automáticamente si la URL tiene ?open=true
   useEffect(() => {
@@ -26,7 +33,7 @@ export function PetsActions({ showFormButton, showInfoButton }: { showFormButton
     }
   }, [])
 
-  // Bloquear el scroll del fondo cuando el popup está abierto para evitar temblores
+  // Bloquear el scroll del fondo cuando el popup está abierto
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden'
@@ -36,7 +43,7 @@ export function PetsActions({ showFormButton, showInfoButton }: { showFormButton
     return () => { document.body.style.overflow = 'unset' }
   }, [isOpen])
 
-  // Iniciar y detener la cámara correctamente
+  // Iniciar y detener la cámara
   useEffect(() => {
     let html5Qrcode: Html5Qrcode | null = null
 
@@ -46,7 +53,10 @@ export function PetsActions({ showFormButton, showInfoButton }: { showFormButton
         scannerRef.current = html5Qrcode
         await html5Qrcode.start(
           { facingMode: "environment" },
-          { fps: 10, qrbox: { width: 250, height: 250 } },
+          { 
+            fps: 10, 
+            qrbox: { width: 200, height: 200 } // Caja de escaneo cuadrada
+          },
           async (decodedText) => {
             if (html5Qrcode?.isScanning) {
               await html5Qrcode.stop()
@@ -62,8 +72,7 @@ export function PetsActions({ showFormButton, showInfoButton }: { showFormButton
     }
 
     if (isOpen && mode === 'scan') {
-      // Pequeño delay para asegurar que el div sea visible antes de iniciar
-      setTimeout(startScanner, 100)
+      setTimeout(startScanner, 150) // Delay para asegurar que el DOM del portal esté listo
     }
 
     return () => {
@@ -81,7 +90,6 @@ export function PetsActions({ showFormButton, showInfoButton }: { showFormButton
     setError('')
     
     try {
-      // Verificamos si el código existe en la base de datos
       const res = await fetch(`/api/escaner/check?code=${cleanCode}`)
       const data = await res.json()
       
@@ -89,7 +97,7 @@ export function PetsActions({ showFormButton, showInfoButton }: { showFormButton
         router.push(`/mascota/${cleanCode}`)
       } else {
         setError('Código inválido. Verifica e intenta de nuevo.')
-        setMode('manual') // Si falló el escaneo, mostramos el manual
+        setMode('manual')
       }
     } catch (e) {
       setError('Error de conexión. Intenta de nuevo.')
@@ -102,6 +110,29 @@ export function PetsActions({ showFormButton, showInfoButton }: { showFormButton
     e.preventDefault()
     verifyAndNavigate(code)
   }
+
+  // Estilos inyectados para forzar el video a ser cuadrado
+  const cameraStyles = `
+    #qr-reader {
+      width: 100% !important;
+      height: 100% !important;
+      border: none !important;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    #qr-reader video {
+      object-fit: cover !important;
+      width: 100% !important;
+      height: 100% !important;
+      aspect-ratio: 1 / 1 !important;
+      border-radius: 12px;
+    }
+    #qr-reader__scan_region {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+  `
 
   return (
     <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-10">
@@ -124,8 +155,11 @@ export function PetsActions({ showFormButton, showInfoButton }: { showFormButton
         </button>
       )}
 
-      {isOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+      {/* Usamos createPortal para renderizar el modal directamente en el <body> y evitar temblores */}
+      {mounted && isOpen && createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+          <style dangerouslySetInnerHTML={{ __html: cameraStyles }} />
+          
           <div className="bg-white rounded-[2rem] w-full max-w-md p-6 sm:p-8 shadow-2xl relative animate-in fade-in zoom-in duration-200">
             <button 
               onClick={() => setIsOpen(false)}
@@ -159,15 +193,10 @@ export function PetsActions({ showFormButton, showInfoButton }: { showFormButton
               </button>
             </div>
 
-            {/* Contenedor de la cámara: IMPORTANTE mantenerlo en el DOM para que la cámara no falle */}
-            <div className={`overflow-hidden rounded-2xl border-2 border-dashed border-brand/30 p-2 relative min-h-[250px] flex-col justify-center items-center ${mode === 'scan' ? 'flex' : 'hidden'}`}>
-              <div id="qr-reader" className="w-full max-w-[250px] overflow-hidden rounded-xl"></div>
+            {/* Contenedor de la cámara con aspect-square para forzar forma cuadrada */}
+            <div className={`overflow-hidden rounded-2xl border-2 border-dashed border-brand/30 p-2 relative flex-col justify-center items-center mx-auto w-full max-w-[280px] aspect-square ${mode === 'scan' ? 'flex' : 'hidden'}`}>
+              <div id="qr-reader" className="w-full h-full"></div>
               {cameraError && <p className="text-red-500 text-xs text-center mt-2">{cameraError}</p>}
-              <style dangerouslySetInnerHTML={{__html: `
-                #qr-reader video { object-fit: cover !important; border-radius: 12px; }
-                #qr-reader { border: none !important; }
-              `}} />
-              <p className="text-center text-xs text-gray-500 pt-2">Apunta la cámara hacia el código QR del alumno.</p>
             </div>
 
             {/* Formulario manual */}
@@ -192,8 +221,13 @@ export function PetsActions({ showFormButton, showInfoButton }: { showFormButton
                 </button>
               </form>
             )}
+            
+            {mode === 'scan' && (
+               <p className="text-center text-xs text-gray-500 pt-4">Apunta la cámara hacia el código QR del alumno.</p>
+            )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   )
