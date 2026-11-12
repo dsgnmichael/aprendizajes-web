@@ -69,7 +69,7 @@ export function PetsCarousel({ stories, duration = 5000 }: { stories: any[], dur
             className="absolute w-full bg-white rounded-[2rem] shadow-soft border border-gray-100 flex flex-col md:flex-row overflow-hidden cursor-grab active:cursor-grabbing"
           >
             <div className="relative w-full md:w-1/2 h-[350px] md:h-[450px] bg-gray-50 pointer-events-none rounded-t-[2rem] md:rounded-l-[2rem] md:rounded-tr-none">
-              <Image src={current.imageUrl} alt="Mascota" fill className="object-contain p-2" unoptimized />
+              <Image src={current.imageUrl} alt="Mascota" fill className="object-contain p-2" unoptimized onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1543269865-cbf427effbad?q=80&w=1000&auto=format&fit=crop" }} />
             </div>
             <div className="w-full md:w-1/2 p-6 md:p-8 flex flex-col justify-center pointer-events-none">
               <div className="mb-3">
