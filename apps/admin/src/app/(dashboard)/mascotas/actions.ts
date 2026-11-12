@@ -7,3 +7,10 @@ export async function markMascotasAsReadAction() {
   await markPetStoriesAsRead()
   revalidatePath('/', 'layout')
 }
+
+
+export async function updatePetStoryImageAction(id: string, imageUrl: string) {
+  await updatePetStory(id, { imageUrl })
+  revalidatePath('/mascotas')
+  return { success: true }
+}

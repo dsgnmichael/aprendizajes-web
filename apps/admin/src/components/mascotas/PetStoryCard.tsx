@@ -2,80 +2,150 @@
 
 import { useState } from 'react'
 import Image from 'next/image'
-import { Edit2, Trash2, Check, X } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { format } from 'date-fns'
+import { es } from 'date-fns/locale'
+import { CheckCircle2, XCircle, Trash2, Pencil, Image as ImageIcon, Loader2, X, Save } from 'lucide-react'
+import { toast } from '@repo/ui/components/sonner'
 import { Button } from '@repo/ui/components/button'
+import { updatePetStoryStatus, deletePetStory, updatePetStoryTextAction, updatePetStoryImageAction } from '@/app/(dashboard)/mascotas/actions'
+import { upload } from '@vercel/blob/client'
+import { compressImageIfNeeded } from '@/lib/compress-image'
 
-export function PetStoryCard({ story, onUpdateStatus, onDelete, onEditText }: { 
-  story: any, 
-  onUpdateStatus: (id: string, status: 'approved' | 'rejected') => void,
-  onDelete: (id: string) => void,
-  onEditText: (id: string, text: string) => void
-}) {
+export function PetStoryCard({ story }: { story: any }) {
+  const router = useRouter()
   const [isEditing, setIsEditing] = useState(false)
-  const [editText, setEditText] = useState(story.story)
+  const [text, setText] = useState(story.story)
+  const [image, setImage] = useState(story.imageUrl)
+  const [isUploading, setIsUploading] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' });
-  };
+  const handleStatus = async (status: 'approved' | 'rejected') => {
+    await updatePetStoryStatus(story.id, status)
+    toast.success(status === 'approved' ? 'Historia aprobada' : 'Historia rechazada')
+    router.refresh()
+  }
 
+  const handleDelete = async () => {
+    if (!confirm('¿Seguro que deseas eliminar esta historia?')) return
+    await deletePetStory(story.id)
+    toast.success('Historia eliminada')
+    router.refresh()
+  }
 
-  const handleSave = () => {
-    onEditText(story._id, editText)
-    setIsEditing(false)
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setIsUploading(true)
+    try {
+      const fileToUpload = await compressImageIfNeeded(file)
+      const filename = `mascotas/${Date.now()}-${fileToUpload.name.replace(/[^a-zA-Z0-9.]/g, '_')}`
+      const blob = await upload(filename, fileToUpload, {
+        access: 'public',
+        handleUploadUrl: '/api/upload',
+      })
+      
+      setImage(blob.url)
+      toast.success('Imagen subida. Haz clic en Guardar para confirmar.')
+    } catch (error) {
+      toast.error('Error al subir la imagen')
+    } finally {
+      setIsUploading(false)
+    }
+  }
+
+  const handleSave = async () => {
+    setIsSaving(true)
+    try {
+      await updatePetStoryTextAction(story.id, text)
+      if (image !== story.imageUrl) {
+        await updatePetStoryImageAction(story.id, image)
+      }
+      toast.success('Historia actualizada correctamente')
+      setIsEditing(false)
+      router.refresh()
+    } catch (error) {
+      toast.error('Error al guardar los cambios')
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   return (
-    <div className="bg-white rounded-2xl shadow-soft border overflow-hidden flex flex-col">
-      <div className="relative aspect-video bg-gray-100">
-        <Image src={story.imageUrl} alt="Mascota" fill className="object-cover" unoptimized />
-      </div>
-      <div className="p-5 flex-1 flex flex-col">
-        <div className="mb-3 flex justify-between items-start">
-          <div>
-            <span className={`inline-block px-2 py-1 text-xs font-bold rounded-full ${
-              story.status === 'approved' ? 'bg-green-100 text-green-800' :
-              story.status === 'rejected' ? 'bg-red-100 text-red-800' :
-              'bg-amber-100 text-amber-800'
-            }`}>
-              {story.status === 'approved' ? 'Aprobado' : story.status === 'rejected' ? 'Rechazado' : 'Pendiente'}
-            </span>
-            <h3 className="font-bold mt-2">{story.studentName}</h3>
-            <p className="text-xs text-muted-foreground">{formatDate(story.createdAt)}</p>
-          </div>
+    <div className="flex flex-col rounded-xl bg-white border shadow-sm overflow-hidden relative">
+      {story.status !== 'approved' && (
+        <div className="absolute top-2 left-2 z-10 bg-yellow-100 text-yellow-800 text-xs font-bold px-2 py-1 rounded-md">
+          {story.status === 'pending' ? 'Pendiente' : 'Rechazada'}
         </div>
-        
-        {isEditing ? (
-          <div className="flex-1 flex flex-col">
-            <textarea 
-              value={editText}
-              onChange={(e) => setEditText(e.target.value)}
-              className="w-full text-sm border rounded-lg p-2 flex-1 mb-2 focus:outline-none focus:border-brand"
-              rows={3}
-            />
-            <div className="flex gap-2 justify-end">
-              <Button variant="ghost" size="sm" onClick={() => setIsEditing(false)}><X className="w-4 h-4 mr-1"/> Cancelar</Button>
-              <Button size="sm" onClick={handleSave}><Check className="w-4 h-4 mr-1"/> Guardar</Button>
-            </div>
-          </div>
+      )}
+
+      {/* Imagen */}
+      <div className="relative h-48 w-full bg-gray-100 group">
+        {image ? (
+          <Image src={image} alt="Mascota" fill className="object-cover" unoptimized />
         ) : (
-          <p className="text-sm text-gray-600 flex-1 italic">"{story.story}"</p>
+          <div className="flex items-center justify-center h-full text-gray-400">
+            <ImageIcon className="size-8" />
+          </div>
         )}
         
-        <div className="mt-5 flex gap-2">
-          {story.status === 'pending' ? (
+        {isEditing && (
+          <label className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity">
+            {isUploading ? (
+              <Loader2 className="size-6 text-white animate-spin" />
+            ) : (
+              <>
+                <ImageIcon className="size-6 text-white mb-1" />
+                <span className="text-xs font-bold text-white">Cambiar Foto</span>
+              </>
+            )}
+            <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} disabled={isUploading} />
+          </label>
+        )}
+      </div>
+
+      <div className="p-4 flex-1 flex flex-col">
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="font-bold text-lg leading-tight">{story.studentName}</h3>
+          <span className="text-xs text-gray-500">
+            {format(new Date(story.createdAt), "d MMM yyyy", { locale: es })}
+          </span>
+        </div>
+
+        {isEditing ? (
+          <textarea
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            className="w-full flex-1 min-h-[100px] p-2 text-sm border rounded-lg focus:outline-none focus:border-brand resize-none mb-4"
+          />
+        ) : (
+          <p className="text-sm text-gray-600 italic flex-1 mb-4">"{story.story}"</p>
+        )}
+
+        <div className="mt-auto flex gap-2">
+          {isEditing ? (
             <>
-              <button onClick={() => onUpdateStatus(story._id, 'approved')} className="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-2 rounded-lg text-sm transition">Aprobar</button>
-              <button onClick={() => onUpdateStatus(story._id, 'rejected')} className="flex-1 bg-red-100 hover:bg-red-200 text-red-700 font-bold py-2 rounded-lg text-sm transition">Rechazar</button>
+              <Button variant="outline" size="sm" className="flex-1" onClick={() => { setIsEditing(false); setImage(story.imageUrl); setText(story.story); }} disabled={isSaving || isUploading}>
+                <X className="size-4 mr-1" /> Cancelar
+              </Button>
+              <Button size="sm" className="flex-1 bg-brand hover:bg-brand-deep" onClick={handleSave} disabled={isSaving || isUploading}>
+                {isSaving ? <Loader2 className="size-4 mr-1 animate-spin" /> : <Save className="size-4 mr-1" />} Guardar
+              </Button>
             </>
           ) : (
             <>
-              <button onClick={() => setIsEditing(true)} className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold py-2 rounded-lg text-sm transition flex items-center justify-center gap-1">
-                <Edit2 className="w-4 h-4" /> Editar
-              </button>
-              <button onClick={() => { if(confirm('¿Seguro que quieres eliminar esta historia?')) onDelete(story._id) }} className="flex-1 bg-red-50 hover:bg-red-100 text-red-600 font-bold py-2 rounded-lg text-sm transition flex items-center justify-center gap-1">
-                <Trash2 className="w-4 h-4" /> Eliminar
-              </button>
+              <Button variant="outline" size="sm" className="flex-1" onClick={() => setIsEditing(true)}>
+                <Pencil className="size-4 mr-1" /> Editar
+              </Button>
+              {story.status !== 'approved' && (
+                <Button size="sm" className="flex-1 bg-green-600 hover:bg-green-700 text-white" onClick={() => handleStatus('approved')}>
+                  <CheckCircle2 className="size-4 mr-1" /> Aprobar
+                </Button>
+              )}
+              <Button variant="destructive" size="sm" onClick={handleDelete}>
+                <Trash2 className="size-4" />
+              </Button>
             </>
           )}
         </div>
