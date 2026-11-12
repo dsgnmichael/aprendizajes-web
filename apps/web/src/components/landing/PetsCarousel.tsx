@@ -13,6 +13,7 @@ export function PetsCarousel({ stories, duration = 5000 }: { stories: any[], dur
   const [paused, setPaused] = useState(false)
   const [isZoomed, setIsZoomed] = useState(false)
   const [mounted, setMounted] = useState(false)
+  const [showHint, setShowHint] = useState(true)
   const count = stories.length
 
   useEffect(() => {
@@ -43,6 +44,13 @@ export function PetsCarousel({ stories, duration = 5000 }: { stories: any[], dur
     const t = setTimeout(() => go(1), duration)
     return () => clearTimeout(t)
   }, [count, paused, go, index, duration, isZoomed])
+
+  // Mostrar el aviso temporal de "Click para ampliar" durante 2 segundos al cambiar de imagen
+  useEffect(() => {
+    setShowHint(true)
+    const timer = setTimeout(() => setShowHint(false), 2000)
+    return () => clearTimeout(timer)
+  }, [index])
 
   if (count === 0) return null
   const current = stories[index]!
@@ -89,14 +97,21 @@ export function PetsCarousel({ stories, duration = 5000 }: { stories: any[], dur
             <div 
               className="relative w-full md:w-1/2 h-[250px] md:h-auto md:min-h-[400px] bg-gray-100 pointer-events-auto group cursor-zoom-in"
               onClick={(e) => {
-                // Evitamos que el click se dispare si el usuario estaba arrastrando
                 if (e.detail === 0) return;
                 setIsZoomed(true);
               }}
             >
               <Image src={current.imageUrl} alt="Mascota" fill className="object-cover" unoptimized />
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center pointer-events-none">
-                <span className="opacity-0 group-hover:opacity-100 bg-black/60 text-white text-xs font-bold px-3 py-1.5 rounded-full transition-opacity">
+              
+              {/* Aviso que aparece 2 segundos y también al pasar el mouse */}
+              <div className={cn(
+                "absolute inset-0 transition-colors duration-500 flex items-center justify-center pointer-events-none",
+                showHint ? "bg-black/20" : "bg-black/0 group-hover:bg-black/10"
+              )}>
+                <span className={cn(
+                  "bg-black/60 text-white text-xs font-bold px-3 py-1.5 rounded-full transition-opacity duration-500",
+                  showHint ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+                )}>
                   Click para ampliar
                 </span>
               </div>
