@@ -1,13 +1,23 @@
 'use server'
 
-import { markPetStoriesAsRead } from '@repo/data-access'
 import { revalidatePath } from 'next/cache'
+import { updatePetStoryStatus, deletePetStory, updatePetStory } from '@repo/data-access'
 
-export async function markMascotasAsReadAction() {
-  await markPetStoriesAsRead()
-  revalidatePath('/', 'layout')
+export async function updatePetStoryStatusAction(id: string, status: 'pending' | 'approved' | 'rejected') {
+  await updatePetStoryStatus(id, status)
+  revalidatePath('/mascotas')
 }
 
+export async function deletePetStoryAction(id: string) {
+  await deletePetStory(id)
+  revalidatePath('/mascotas')
+}
+
+export async function updatePetStoryTextAction(id: string, story: string) {
+  await updatePetStory(id, { story })
+  revalidatePath('/mascotas')
+  return { success: true }
+}
 
 export async function updatePetStoryImageAction(id: string, imageUrl: string) {
   await updatePetStory(id, { imageUrl })

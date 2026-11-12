@@ -3,12 +3,10 @@
 import { useState } from 'react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { format } from 'date-fns'
-import { es } from 'date-fns/locale'
-import { CheckCircle2, XCircle, Trash2, Pencil, Image as ImageIcon, Loader2, X, Save } from 'lucide-react'
+import { CheckCircle2, Trash2, Pencil, Image as ImageIcon, Loader2, X, Save } from 'lucide-react'
 import { toast } from '@repo/ui/components/sonner'
 import { Button } from '@repo/ui/components/button'
-import { updatePetStoryStatus, deletePetStory, updatePetStoryTextAction, updatePetStoryImageAction } from '@/app/(dashboard)/mascotas/actions'
+import { updatePetStoryStatusAction, deletePetStoryAction, updatePetStoryTextAction, updatePetStoryImageAction } from '@/app/(dashboard)/mascotas/actions'
 import { upload } from '@vercel/blob/client'
 import { compressImageIfNeeded } from '@/lib/compress-image'
 
@@ -20,15 +18,21 @@ export function PetStoryCard({ story }: { story: any }) {
   const [isUploading, setIsUploading] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
 
+  const formatDate = (dateStr: string) => {
+    if (!dateStr) return '';
+    const d = new Date(dateStr);
+    return d.toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' });
+  };
+
   const handleStatus = async (status: 'approved' | 'rejected') => {
-    await updatePetStoryStatus(story.id, status)
+    await updatePetStoryStatusAction(story.id, status)
     toast.success(status === 'approved' ? 'Historia aprobada' : 'Historia rechazada')
     router.refresh()
   }
 
   const handleDelete = async () => {
     if (!confirm('¿Seguro que deseas eliminar esta historia?')) return
-    await deletePetStory(story.id)
+    await deletePetStoryAction(story.id)
     toast.success('Historia eliminada')
     router.refresh()
   }
@@ -80,7 +84,6 @@ export function PetStoryCard({ story }: { story: any }) {
         </div>
       )}
 
-      {/* Imagen */}
       <div className="relative h-48 w-full bg-gray-100 group">
         {image ? (
           <Image src={image} alt="Mascota" fill className="object-cover" unoptimized />
@@ -109,7 +112,7 @@ export function PetStoryCard({ story }: { story: any }) {
         <div className="flex items-center justify-between mb-2">
           <h3 className="font-bold text-lg leading-tight">{story.studentName}</h3>
           <span className="text-xs text-gray-500">
-            {format(new Date(story.createdAt), "d MMM yyyy", { locale: es })}
+            {formatDate(story.createdAt)}
           </span>
         </div>
 
