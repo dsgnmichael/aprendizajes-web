@@ -15,7 +15,7 @@ const getStories = unstable_cache(
     }))
   },
   ['pet-stories'],
-  { revalidate: 60, tags: ['pet-stories'] }
+  { revalidate: 0, tags: ['pet-stories'] }
 )
 
 export async function PetsWall({ section }: { section?: any } = {}) {

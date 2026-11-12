@@ -140,7 +140,7 @@ export function PetStoryCard({ story }: { story: any }) {
               </Button>
               <Button 
                 size="sm" 
-                className="flex-1 min-w-[100px] bg-brand hover:bg-brand-deep text-white font-bold" 
+                className="flex-1 min-w-[100px] bg-[#4d2a80] hover:bg-[#2e1752] text-white font-bold" 
                 onClick={handleSave} 
                 disabled={isSaving || isUploading}
               >
