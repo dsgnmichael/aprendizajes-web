@@ -3,14 +3,31 @@
 import { useState, useEffect, useCallback } from 'react'
 import Image from 'next/image'
 import { motion, AnimatePresence } from 'motion/react'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { ChevronLeft, ChevronRight, X } from 'lucide-react'
+import { createPortal } from 'react-dom'
 import { cn } from '@/lib/cn'
 
 export function PetsCarousel({ stories, duration = 5000 }: { stories: any[], duration?: number }) {
   const [index, setIndex] = useState(0)
   const [direction, setDirection] = useState(1)
   const [paused, setPaused] = useState(false)
+  const [isZoomed, setIsZoomed] = useState(false)
+  const [mounted, setMounted] = useState(false)
   const count = stories.length
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  // Bloquear scroll cuando la imagen está maximizada
+  useEffect(() => {
+    if (isZoomed) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = 'unset'
+    }
+    return () => { document.body.style.overflow = 'unset' }
+  }, [isZoomed])
 
   const go = useCallback(
     (delta: number) => {
@@ -22,10 +39,10 @@ export function PetsCarousel({ stories, duration = 5000 }: { stories: any[], dur
   )
 
   useEffect(() => {
-    if (count < 2 || paused) return
+    if (count < 2 || paused || isZoomed) return
     const t = setTimeout(() => go(1), duration)
     return () => clearTimeout(t)
-  }, [count, paused, go, index, duration])
+  }, [count, paused, go, index, duration, isZoomed])
 
   if (count === 0) return null
   const current = stories[index]!
@@ -52,7 +69,7 @@ export function PetsCarousel({ stories, duration = 5000 }: { stories: any[], dur
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
-      <div className="relative w-full max-w-lg md:max-w-3xl mx-auto min-h-[450px] md:min-h-[450px] flex items-center justify-center">
+      <div className="relative min-h-[450px] md:min-h-[400px] flex items-center justify-center">
         <AnimatePresence initial={false} custom={direction}>
           <motion.div
             key={index}
@@ -68,9 +85,23 @@ export function PetsCarousel({ stories, duration = 5000 }: { stories: any[], dur
             onDragEnd={handleDragEnd}
             className="absolute w-full bg-white rounded-[2rem] shadow-soft border border-gray-100 flex flex-col md:flex-row overflow-hidden cursor-grab active:cursor-grabbing"
           >
-            <div className="relative w-full md:w-1/2 h-[350px] md:h-[450px] bg-gray-50 pointer-events-none rounded-t-[2rem] md:rounded-l-[2rem] md:rounded-tr-none">
-              <Image src={current.imageUrl} alt="Mascota" fill className="object-contain p-2" unoptimized onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1543269865-cbf427effbad?q=80&w=1000&auto=format&fit=crop" }} />
+            {/* Imagen clickeable para maximizar */}
+            <div 
+              className="relative w-full md:w-1/2 h-[250px] md:h-auto md:min-h-[400px] bg-gray-100 pointer-events-auto group cursor-zoom-in"
+              onClick={(e) => {
+                // Evitamos que el click se dispare si el usuario estaba arrastrando
+                if (e.detail === 0) return;
+                setIsZoomed(true);
+              }}
+            >
+              <Image src={current.imageUrl} alt="Mascota" fill className="object-cover" unoptimized />
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center pointer-events-none">
+                <span className="opacity-0 group-hover:opacity-100 bg-black/60 text-white text-xs font-bold px-3 py-1.5 rounded-full transition-opacity">
+                  Click para ampliar
+                </span>
+              </div>
             </div>
+
             <div className="w-full md:w-1/2 p-6 md:p-8 flex flex-col justify-center pointer-events-none">
               <div className="mb-3">
                 <h3 className="text-2xl font-black text-brand">{current.studentName}</h3>
@@ -78,6 +109,7 @@ export function PetsCarousel({ stories, duration = 5000 }: { stories: any[], dur
               </div>
               <p className="text-base md:text-lg text-ink-muted italic leading-relaxed">"{current.story}"</p>
             </div>
+
             {/* Barra de progreso en el borde inferior de la tarjeta */}
             {count > 1 && (
               <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-gray-100">
@@ -106,7 +138,7 @@ export function PetsCarousel({ stories, duration = 5000 }: { stories: any[], dur
         </>
       )}
 
-      {/* Indicadores (Puntos) y Barra de progreso */}
+      {/* Indicadores (Puntos) */}
       {count > 1 && (
         <div className="flex justify-center items-center gap-2 mt-6">
           {stories.map((_, i) => (
@@ -117,10 +149,42 @@ export function PetsCarousel({ stories, duration = 5000 }: { stories: any[], dur
                 "h-2 rounded-full transition-all duration-300",
                 i === index ? "w-8 bg-brand" : "w-2 bg-gray-300 hover:bg-gray-400"
               )}
-              aria-label={`Ir a la historia ${i + 1}`}
+              aria-label={'Ir a la historia ' + (i + 1)}
             />
           ))}
         </div>
+      )}
+
+      {/* MODAL DE ZOOM (Maximizar imagen) */}
+      {mounted && isZoomed && createPortal(
+        <div 
+          className="fixed inset-0 z-[9999] bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 sm:p-8"
+          onClick={() => setIsZoomed(false)}
+        >
+          <button 
+            onClick={() => setIsZoomed(false)} 
+            className="absolute top-6 right-6 z-50 p-3 bg-white/20 hover:bg-white/40 text-white rounded-full transition-all backdrop-blur-md"
+          >
+            <X className="size-6" />
+          </button>
+          
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9 }} 
+            animate={{ opacity: 1, scale: 1 }} 
+            exit={{ opacity: 0, scale: 0.9 }}
+            className="relative w-full max-w-5xl h-[80vh] flex items-center justify-center pointer-events-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Image 
+              src={current.imageUrl} 
+              alt="Mascota Ampliada" 
+              fill 
+              className="object-contain" 
+              unoptimized 
+            />
+          </motion.div>
+        </div>,
+        document.body
       )}
     </div>
   )
